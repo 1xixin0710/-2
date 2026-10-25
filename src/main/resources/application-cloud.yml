@@ -1,0 +1,28 @@
+spring:
+  config:
+    activate:
+      on-profile: cloud
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 5
+      connection-timeout: 15000
+  sql:
+    init:
+      mode: ${DB_INIT_MODE:never}
+      schema-locations: classpath:db/mysql-schema.sql
+      data-locations: classpath:data.sql
+      encoding: UTF-8
+
+server:
+  port: ${PORT:8080}
+  forward-headers-strategy: native
+  tomcat:
+    use-relative-redirects: true
+
+logging:
+  level:
+    com.dlut.library.mapper: info

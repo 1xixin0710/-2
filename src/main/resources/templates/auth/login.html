@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('登录')}"></head>
+<body class="auth-page">
+<main class="auth-layout">
+    <section class="auth-visual">
+        <a class="brand brand-light" th:href="@{/catalog}">
+            <span class="brand-seal">大图</span>
+            <span class="brand-name">
+                <strong>大工云图书馆</strong>
+                <small>DALIAN UNIVERSITY OF TECHNOLOGY LIBRARY</small>
+            </span>
+        </a>
+        <div class="auth-visual-copy">
+            <p>馆藏服务</p>
+            <h1>把需要的书<br>带回阅读桌</h1>
+            <span>检索、预约、取书与归还记录统一保存在馆藏系统中。</span>
+        </div>
+        <p class="auth-photo-note">大连理工大学图书馆 · 阅览区</p>
+    </section>
+
+    <section class="auth-form-panel">
+        <div class="auth-form-wrap">
+            <a class="back-link" th:href="@{/catalog}"><i data-lucide="arrow-left"></i> 返回馆藏检索</a>
+            <h2>读者登录</h2>
+            <p class="auth-intro">使用注册账号进入借阅服务。</p>
+
+            <div class="form-alert" th:if="${success}" th:text="${success}">注册成功</div>
+            <div class="form-alert form-alert-error" th:if="${error}" th:text="${error}">用户名或密码错误</div>
+
+            <form class="auth-form" th:action="@{/login}" method="post">
+                <label class="field">
+                    <span>用户名</span>
+                    <input type="text" name="username" autocomplete="username" required autofocus
+                           placeholder="请输入用户名">
+                </label>
+                <label class="field">
+                    <span>密码</span>
+                    <span class="password-shell">
+                        <input type="password" name="password" autocomplete="current-password" required
+                               placeholder="请输入密码" data-password-input>
+                        <button type="button" class="password-toggle" data-password-toggle aria-label="显示密码">
+                            <i data-lucide="eye"></i>
+                        </button>
+                    </span>
+                </label>
+                <button class="button button-primary button-block" type="submit">
+                    登录 <i data-lucide="arrow-right"></i>
+                </button>
+            </form>
+            <p class="auth-switch">还没有账号？<a th:href="@{/register}">注册读者账号</a></p>
+            <p class="auth-footnote">馆藏检索无需登录；预约借阅、查看记录与馆藏管理需使用个人账号。</p>
+        </div>
+    </section>
+</main>
+<script th:replace="~{fragments :: scripts}"></script>
+</body>
+</html>

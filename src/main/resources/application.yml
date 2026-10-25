@@ -1,0 +1,33 @@
+server:
+  port: 8080
+  servlet:
+    session:
+      tracking-modes: cookie
+
+spring:
+  application:
+    name: dagong-cloud-library
+  datasource:
+    url: jdbc:h2:mem:dagong_library;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  sql:
+    init:
+      mode: always
+      encoding: UTF-8
+  thymeleaf:
+    cache: false
+  h2:
+    console:
+      enabled: false
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.dlut.library.model
+  configuration:
+    map-underscore-to-camel-case: true
+
+logging:
+  level:
+    com.dlut.library.mapper: info

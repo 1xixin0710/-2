@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('页面提示')}"></head>
+<body class="site-page">
+<header th:replace="~{fragments :: header('')}"></header>
+<main class="site-main">
+    <section class="error-panel">
+        <span th:text="${status == null ? '提示' : status}">404</span>
+        <h1 th:text="${status == 404 ? '没有找到这个页面' : (status == 403 ? '没有访问权限' : '页面暂时无法访问')}">页面提示</h1>
+        <p th:text="${message == null or message == '' ? '请返回馆藏检索后重试。' : message}">请返回馆藏检索后重试。</p>
+        <a class="button button-primary" th:href="@{/catalog}">返回馆藏检索</a>
+    </section>
+</main>
+<footer th:replace="~{fragments :: footer}"></footer>
+<script th:replace="~{fragments :: scripts}"></script>
+</body>
+</html>

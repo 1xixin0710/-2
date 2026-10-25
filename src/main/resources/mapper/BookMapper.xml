@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dlut.library.mapper.BookMapper">
+
+    <sql id="bookColumns">
+        id, isbn, title, author, publisher, publish_year, category, language,
+        call_number, location, total_copies, available_copies, cover_url,
+        summary, tags, acquisition_date, status, created_at
+    </sql>
+
+    <select id="search" parameterType="BookQuery" resultType="Book">
+        SELECT <include refid="bookColumns"/>
+        FROM books
+        <where>
+            status = '在馆'
+            <if test="keyword != null">
+                AND (
+                    LOWER(title) LIKE CONCAT('%', LOWER(#{keyword}), '%')
+                    OR LOWER(author) LIKE CONCAT('%', LOWER(#{keyword}), '%')
+                    OR isbn LIKE CONCAT('%', #{keyword}, '%')
+                    OR LOWER(call_number) LIKE CONCAT('%', LOWER(#{keyword}), '%')
+                )
+            </if>
+            <if test="category != null">
+                AND category = #{category}
+            </if>
+            <if test="availability == '可借'">
+                AND available_copies &gt; 0
+            </if>
+            <if test="availability == '已借完'">
+                AND available_copies = 0
+            </if>
+        </where>
+        ORDER BY acquisition_date DESC, title ASC
+    </select>
+
+    <select id="findById" resultType="Book">
+        SELECT <include refid="bookColumns"/>
+        FROM books
+        WHERE id = #{id}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO books (
+            isbn, title, author, publisher, publish_year, category, language,
+            call_number, location, total_copies, available_copies, cover_url,
+            summary, tags, acquisition_date, status
+        )
+        VALUES (
+            #{isbn}, #{title}, #{author}, #{publisher}, #{publishYear}, #{category}, #{language},
+            #{callNumber}, #{location}, #{totalCopies}, #{availableCopies}, #{coverUrl},
+            #{summary}, #{tags}, #{acquisitionDate}, #{status}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE books
+        SET isbn = #{isbn},
+            title = #{title},
+            author = #{author},
+            publisher = #{publisher},
+            publish_year = #{publishYear},
+            category = #{category},
+            language = #{language},
+            call_number = #{callNumber},
+            location = #{location},
+            total_copies = #{totalCopies},
+            available_copies = #{availableCopies},
+            cover_url = #{coverUrl},
+            summary = #{summary},
+            tags = #{tags},
+            acquisition_date = #{acquisitionDate},
+            status = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM books WHERE id = #{id}
+    </delete>
+
+    <update id="decrementAvailable">
+        UPDATE books
+        SET available_copies = available_copies - 1
+        WHERE id = #{id} AND status = '在馆' AND available_copies &gt; 0
+    </update>
+
+    <update id="incrementAvailable">
+        UPDATE books
+        SET available_copies = available_copies + 1
+        WHERE id = #{id} AND available_copies &lt; total_copies
+    </update>
+
+    <select id="countTitles" resultType="int">
+        SELECT COUNT(*) FROM books WHERE status = '在馆'
+    </select>
+
+    <select id="countAvailableTitles" resultType="int">
+        SELECT COUNT(*) FROM books WHERE status = '在馆' AND available_copies &gt; 0
+    </select>
+
+    <select id="sumCopies" resultType="int">
+        SELECT COALESCE(SUM(total_copies), 0) FROM books WHERE status = '在馆'
+    </select>
+
+    <select id="countActiveLoans" resultType="int">
+        SELECT COUNT(*) FROM loans WHERE status IN ('待取书', '借阅中')
+    </select>
+
+    <select id="countByCategory" resultType="int">
+        SELECT COUNT(*) FROM books WHERE category = #{category} AND status = '在馆'
+    </select>
+</mapper>

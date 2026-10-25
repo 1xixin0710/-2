@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head(${librarianMode ? '借阅管理' : '我的借阅'})}"></head>
+<body class="site-page">
+<header th:replace="~{fragments :: header('loans')}"></header>
+<main class="site-main">
+    <div th:replace="~{fragments :: flash}"></div>
+    <section class="page-heading">
+        <div>
+            <p class="section-kicker" th:text="${librarianMode ? '馆员工作台' : '读者服务'}">读者服务</p>
+            <h1 th:text="${librarianMode ? '借阅管理' : '我的借阅'}">我的借阅</h1>
+            <p th:text="${librarianMode ? '查看全部预约，办理取书和归还。' : '查看预约状态、借阅期限和应还日期。'}">借阅记录</p>
+        </div>
+        <a class="button button-outline" th:href="@{/catalog}"><i data-lucide="search"></i> 继续检索</a>
+    </section>
+
+    <div class="empty-state" th:if="${#lists.isEmpty(loans)}">
+        <i data-lucide="book-dashed"></i>
+        <h2>暂无借阅记录</h2>
+        <p th:text="${librarianMode ? '读者提交预约后会显示在这里。' : '在馆藏检索中选择可借图书，即可提交预约。'}">暂无记录</p>
+        <a class="button button-primary" th:href="@{/catalog}">查看馆藏</a>
+    </div>
+
+    <section class="loan-list" th:unless="${#lists.isEmpty(loans)}">
+        <article class="loan-row" th:each="loan : ${loans}">
+            <div class="loan-book">
+                <img th:src="${loan.bookCoverUrl}" th:alt="${loan.bookTitle}">
+                <div>
+                    <span class="loan-number" th:text="${'借阅单号 ' + loan.loanNo}">借阅单号</span>
+                    <h2><a th:href="@{/books/{id}(id=${loan.bookId})}" th:text="${loan.bookTitle}">Clean Code</a></h2>
+                    <p th:text="${'索书号 ' + loan.callNumber}">索书号</p>
+                    <p th:if="${librarianMode}" th:text="${loan.readerName + ' · ' + loan.readerUsername + ' · ' + loan.contact}">读者</p>
+                </div>
+            </div>
+            <div class="loan-dates">
+                <dl>
+                    <div><dt>借阅类型</dt><dd th:text="${loan.borrowType}">个人借阅</dd></div>
+                    <div><dt>预约取书</dt><dd th:text="${#temporals.format(loan.scheduledPickupAt, 'yyyy-MM-dd HH:mm')}">2026-10-25 14:00</dd></div>
+                    <div><dt>应还日期</dt><dd th:text="${#temporals.format(loan.dueDate, 'yyyy-MM-dd')}">2026-11-24</dd></div>
+                    <div><dt>取书地点</dt><dd th:text="${loan.pickupLocation}">伯川图书馆三层</dd></div>
+                </dl>
+            </div>
+            <div class="loan-state">
+                <span class="loan-status"
+                      th:classappend="${loan.displayStatus == '待取书' ? 'is-waiting' : (loan.displayStatus == '借阅中' ? 'is-borrowed' : (loan.displayStatus == '已逾期' ? 'is-overdue' : 'is-closed'))}"
+                      th:text="${loan.displayStatus}">待取书</span>
+                <div class="loan-actions">
+                    <form th:if="${!librarianMode and loan.status == '待取书'}" th:action="@{/loans/{id}/cancel(id=${loan.id})}" method="post">
+                        <button class="text-button" type="submit">取消预约</button>
+                    </form>
+                    <form th:if="${librarianMode and loan.status == '待取书'}" th:action="@{/loans/{id}/pickup(id=${loan.id})}" method="post">
+                        <button class="button button-small button-primary" type="submit">确认取书</button>
+                    </form>
+                    <form th:if="${loan.status == '借阅中' and (!librarianMode or loan.readerUsername == session.authUser.username)}"
+                          th:action="@{/loans/{id}/return(id=${loan.id})}" method="post">
+                        <button class="button button-small button-outline" type="submit">办理归还</button>
+                    </form>
+                    <form th:if="${librarianMode and loan.status == '借阅中' and loan.readerUsername != session.authUser.username}"
+                          th:action="@{/loans/{id}/return(id=${loan.id})}" method="post">
+                        <button class="button button-small button-outline" type="submit">馆员归还</button>
+                    </form>
+                </div>
+                <p th:if="${loan.isOverdue()}">该书已超过应还日期，请尽快归还。</p>
+            </div>
+        </article>
+    </section>
+</main>
+<footer th:replace="~{fragments :: footer}"></footer>
+<script th:replace="~{fragments :: scripts}"></script>
+</body>
+</html>
