@@ -2,6 +2,10 @@
 
 基于 Spring、Spring MVC、MyBatis 的图书管理系统。页面使用 Thymeleaf 服务端渲染，本地开发使用 H2，云端部署使用 MySQL。
 
+在线访问：https://dagong-library-cloud-77rx9j6754ggcq4w-8080.app.github.dev/catalog
+
+课程报告：[网站建设大作业-学号-姓名.docx](./网站建设大作业-学号-姓名.docx)
+
 ## 功能
 
 - 公开馆藏检索：书名、作者、ISBN、索书号、分类和可借状态。
