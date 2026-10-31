@@ -12,6 +12,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -58,7 +61,7 @@ class LibraryApplicationTests {
                         .param("callNumber", "TP311/T001")
                         .param("location", "伯川图书馆三层")
                         .param("totalCopies", "2")
-                        .param("acquisitionDate", "2026-10-25T09:00")
+                        .param("acquisitionDate", LocalDateTime.now().minusDays(1).withNano(0).toString())
                         .param("status", "在馆"))
                 .andExpect(status().is3xxRedirection());
 
@@ -74,8 +77,8 @@ class LibraryApplicationTests {
                         .param("pickupLocation", "伯川图书馆三层")
                         .param("contact", "13800000000")
                         .param("note", "自动化测试借阅")
-                        .param("scheduledPickupAt", "2026-10-26T10:00")
-                        .param("dueDate", "2026-11-25"))
+                        .param("scheduledPickupAt", LocalDateTime.now().plusDays(1).withNano(0).toString())
+                        .param("dueDate", LocalDate.now().plusDays(30).toString()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/loans"));
 
