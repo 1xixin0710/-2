@@ -3,63 +3,92 @@
 <head th:fragment="head(title)">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${title} + ' · 大工云图书馆'">大工云图书馆</title>
-    <meta name="description" content="大工云图书馆馆藏检索与借阅服务">
+    <title th:text="${title} + ' - 云序书集'">云序书集</title>
+    <meta name="description" content="云序书集校园图书商城，提供教材、名著、人工智能与电子商务类图书。">
     <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
     <link rel="stylesheet" th:href="@{/css/app.css}">
     <script th:src="@{/js/lucide.min.js}" defer></script>
     <script th:src="@{/js/app.js}" defer></script>
 </head>
 <body>
-<header class="site-header" th:fragment="header(active)">
-    <div class="header-inner">
-        <a class="brand" th:href="@{/catalog}" aria-label="大工云图书馆首页">
-            <span class="brand-seal">大图</span>
-            <span class="brand-name">
-                <strong>大工云图书馆</strong>
-                <small>DALIAN UNIVERSITY OF TECHNOLOGY LIBRARY</small>
-            </span>
-        </a>
 
-        <nav class="primary-nav" aria-label="主要导航">
-            <a th:href="@{/catalog}" th:classappend="${active == 'catalog'} ? 'is-active'">
-                <i data-lucide="library-big"></i>
-                <span>馆藏检索</span>
-            </a>
-            <a th:if="${session.authUser != null}" th:href="@{/loans}"
-               th:classappend="${active == 'loans'} ? 'is-active'">
-                <i data-lucide="book-marked"></i>
-                <span th:text="${session.authUser.librarian ? '借阅管理' : '我的借阅'}">我的借阅</span>
-            </a>
-            <a th:if="${session.authUser != null and session.authUser.librarian}"
-               th:href="@{/librarian/books/new}" th:classappend="${active == 'manage'} ? 'is-active'">
-                <i data-lucide="book-plus"></i>
-                <span>图书入藏</span>
-            </a>
-        </nav>
-
-        <div class="account-area">
-            <div class="reader-meta" th:if="${session.authUser != null}">
-                <span class="reader-avatar" th:text="${#strings.substring(session.authUser.displayName, 0, 1)}">林</span>
-                <span>
-                    <strong th:text="${session.authUser.displayName}">张同学</strong>
-                    <small th:text="${session.authUser.roleLabel + ' · ' + session.authUser.studentNo}">读者 · 20260001</small>
-                </span>
-            </div>
-            <form th:if="${session.authUser != null}" th:action="@{/logout}" method="post">
-                <button class="icon-button" type="submit" title="退出登录" aria-label="退出登录">
-                    <i data-lucide="log-out"></i>
-                </button>
-            </form>
-            <div class="guest-actions" th:if="${session.authUser == null}">
-                <a class="text-button" th:href="@{/login}">登录</a>
-                <a class="button button-primary button-small" th:href="@{/register}">注册</a>
+<header class="site-header" th:fragment="siteHeader(active)">
+    <div class="utility-bar">
+        <div class="container utility-inner">
+            <span>校园正版图书 · 大连理工大学校内配送</span>
+            <div>
+                <span>货到付款</span>
+                <a th:if="${session.authUser != null}" th:href="@{/orders}">我的订单</a>
+                <a th:if="${session.authUser != null and session.authUser.admin}" th:href="@{/admin}">管理后台</a>
+                <span th:if="${session.authUser == null}">注册后可在线下单</span>
             </div>
         </div>
     </div>
+
+    <div class="header-main">
+        <div class="container header-main-inner">
+            <a class="brand" th:href="@{/catalog}" aria-label="云序书集首页">
+                <span class="brand-mark"><i data-lucide="book-open"></i></span>
+                <span class="brand-copy">
+                    <strong>云序书集</strong>
+                    <small>校园精选书店</small>
+                </span>
+            </a>
+
+            <form class="header-search" th:action="@{/catalog}" method="get">
+                <input type="search" name="keyword" placeholder="搜索书名、作者、ISBN 或出版社" aria-label="搜索商品">
+                <button type="submit" aria-label="搜索"><i data-lucide="search"></i><span>搜索</span></button>
+            </form>
+
+            <div class="header-actions">
+                <a class="cart-link" th:href="@{/cart}" th:classappend="${active == 'cart'} ? 'is-active'">
+                    <i data-lucide="shopping-cart"></i>
+                    <span>购物车</span>
+                    <strong th:text="${session.cartCount != null ? session.cartCount : 0}">0</strong>
+                </a>
+
+                <div class="header-user" th:if="${session.authUser != null}">
+                    <a th:href="@{/orders}">
+                        <span class="user-avatar" th:text="${#strings.substring(session.authUser.displayName, 0, 1)}">林</span>
+                        <span>
+                            <strong th:text="${session.authUser.displayName}">用户</strong>
+                            <small th:text="${session.authUser.roleLabel}">顾客</small>
+                        </span>
+                    </a>
+                    <form th:action="@{/logout}" method="post">
+                        <button class="icon-button" type="submit" title="退出登录" aria-label="退出登录">
+                            <i data-lucide="log-out"></i>
+                        </button>
+                    </form>
+                </div>
+                <div class="guest-actions" th:if="${session.authUser == null}">
+                    <a th:href="@{/login}">登录</a>
+                    <a class="button button-primary button-small" th:href="@{/register}">免费注册</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="category-nav" aria-label="商品分类">
+        <div class="container category-inner">
+            <a th:href="@{/catalog}" th:classappend="${active == 'catalog'} ? 'is-active'">全部商品</a>
+            <a th:href="@{/catalog(category='文学')}">文学名著</a>
+            <a th:href="@{/catalog(category='人工智能')}">人工智能</a>
+            <a th:href="@{/catalog(category='电子商务')}">电子商务</a>
+            <a th:href="@{/catalog(category='计算机')}">计算机</a>
+            <a th:href="@{/catalog(category='经济管理')}">经济管理</a>
+            <a th:href="@{/catalog(category='数学')}">数学</a>
+            <a th:href="@{/catalog(category='自然科学')}">自然科学</a>
+            <a th:href="@{/catalog(sort='sales')}">热销榜</a>
+            <a th:href="@{/orders}" th:classappend="${active == 'orders'} ? 'is-active'"
+               th:if="${session.authUser != null}">我的订单</a>
+            <a th:href="@{/admin}" th:classappend="${active == 'admin'} ? 'is-active'"
+               th:if="${session.authUser != null and session.authUser.admin}">后台管理</a>
+        </div>
+    </nav>
 </header>
 
-<div th:fragment="flash" class="flash-stack" aria-live="polite">
+<div th:fragment="flash" class="container flash-stack" aria-live="polite">
     <div class="flash flash-success" th:if="${success}">
         <i data-lucide="circle-check"></i>
         <span th:text="${success}">操作成功</span>
@@ -71,12 +100,70 @@
 </div>
 
 <footer class="site-footer" th:fragment="footer">
-    <div>
-        <strong>大工云图书馆</strong>
-        <span>馆藏检索与借阅服务</span>
+    <div class="container footer-grid">
+        <div class="footer-brand">
+            <strong>云序书集</strong>
+            <p>面向校园读者的正版图书选购平台，提供教材、经典作品与前沿技术读物。</p>
+        </div>
+        <div>
+            <h3>购物指南</h3>
+            <a th:href="@{/catalog}">选购图书</a>
+            <a th:href="@{/cart}">购物车</a>
+            <a th:href="@{/orders}">订单查询</a>
+        </div>
+        <div>
+            <h3>配送与付款</h3>
+            <span>校内配送：1至2个工作日</span>
+            <span>到店自提：大学生活动中心一层</span>
+            <span>付款方式：货到付款</span>
+        </div>
+        <div>
+            <h3>联系我们</h3>
+            <span>服务时间：08:30至20:30</span>
+            <span>校内服务点：大学生活动中心一层</span>
+        </div>
     </div>
-    <p>借阅服务时间：周一至周日 08:00—22:00</p>
+    <div class="footer-bottom">
+        <div class="container">© 2026 云序书集 · 网站建设与管理课程实践项目</div>
+    </div>
 </footer>
+
+<header class="admin-topbar" th:fragment="adminTopbar(active)">
+    <a class="admin-brand" th:href="@{/admin}">
+        <span><i data-lucide="layout-dashboard"></i></span>
+        <strong>云序书集管理后台</strong>
+    </a>
+    <div class="admin-top-actions">
+        <a th:href="@{/catalog}"><i data-lucide="store"></i> 返回商城</a>
+        <span th:text="${session.authUser != null ? session.authUser.displayName + ' · ' + session.authUser.roleLabel : '管理员'}">管理员</span>
+        <form th:action="@{/logout}" method="post">
+            <button type="submit" title="退出登录" aria-label="退出登录"><i data-lucide="log-out"></i></button>
+        </form>
+    </div>
+</header>
+
+<aside class="admin-sidebar" th:fragment="adminSidebar(active)">
+    <p>经营管理</p>
+    <a th:href="@{/admin}" th:classappend="${active == 'dashboard'} ? 'is-active'">
+        <i data-lucide="layout-dashboard"></i><span>经营概览</span>
+    </a>
+    <a th:href="@{/admin/products}" th:classappend="${active == 'products'} ? 'is-active'">
+        <i data-lucide="package-search"></i><span>商品管理</span>
+    </a>
+    <a th:href="@{/admin/orders}" th:classappend="${active == 'orders'} ? 'is-active'">
+        <i data-lucide="receipt-text"></i><span>订单管理</span>
+    </a>
+    <a th:href="@{/admin/users}" th:classappend="${active == 'users'} ? 'is-active'">
+        <i data-lucide="users-round"></i><span>用户管理</span>
+    </a>
+    <p>快捷入口</p>
+    <a th:href="@{/admin/products/new}">
+        <i data-lucide="package-plus"></i><span>上架商品</span>
+    </a>
+    <a th:href="@{/catalog}">
+        <i data-lucide="external-link"></i><span>查看前台</span>
+    </a>
+</aside>
 
 <div th:fragment="scripts">
     <script>

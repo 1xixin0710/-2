@@ -1,5 +1,7 @@
 package com.dlut.library.model;
 
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -9,24 +11,26 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Book {
+public class Product {
 
     private Long id;
 
-    @NotBlank(message = "请输入ISBN")
-    @Pattern(regexp = "^(97[89])?\\d{9}[\\dX]$", message = "ISBN格式不正确")
+    @NotBlank(message = "请输入 ISBN")
+    @Pattern(regexp = "^(97[89])?\\d{9}[\\dX]$", message = "ISBN 格式不正确")
     private String isbn;
 
-    @NotBlank(message = "请输入书名")
-    @Size(max = 100, message = "书名不能超过100个字符")
-    private String title;
+    @NotBlank(message = "请输入商品名称")
+    @Size(max = 120, message = "商品名称不能超过120个字符")
+    private String name;
 
     @NotBlank(message = "请输入作者")
-    @Size(max = 80, message = "作者不能超过80个字符")
+    @Size(max = 100, message = "作者不能超过100个字符")
     private String author;
 
     @NotBlank(message = "请输入出版社")
@@ -43,23 +47,27 @@ public class Book {
     @NotBlank(message = "请选择语种")
     private String language;
 
-    @NotBlank(message = "请输入索书号")
-    private String callNumber;
+    @NotNull(message = "请输入销售价")
+    @DecimalMin(value = "0.01", message = "销售价必须大于0")
+    @Digits(integer = 8, fraction = 2, message = "销售价格式不正确")
+    private BigDecimal price;
 
-    @NotBlank(message = "请选择馆藏地")
-    private String location;
+    @NotNull(message = "请输入划线价")
+    @DecimalMin(value = "0.01", message = "划线价必须大于0")
+    @Digits(integer = 8, fraction = 2, message = "划线价格式不正确")
+    private BigDecimal originalPrice;
 
-    @NotNull(message = "请输入馆藏册数")
-    @Min(value = 1, message = "馆藏册数至少为1")
-    @Max(value = 999, message = "馆藏册数不能超过999")
-    private Integer totalCopies;
+    @NotNull(message = "请输入库存")
+    @Min(value = 0, message = "库存不能小于0")
+    @Max(value = 99999, message = "库存数量过大")
+    private Integer stock;
 
-    private Integer availableCopies;
+    private Integer soldCount;
 
     private String coverUrl;
 
-    @NotBlank(message = "请输入内容简介")
-    @Size(max = 1200, message = "内容简介不能超过1200个字符")
+    @NotBlank(message = "请输入商品介绍")
+    @Size(max = 1500, message = "商品介绍不能超过1500个字符")
     private String summary;
 
     private String tags;
@@ -67,11 +75,11 @@ public class Book {
     @NotEmpty(message = "请至少选择一个标签")
     private List<String> tagChoices = new ArrayList<>();
 
-    @NotNull(message = "请选择入藏时间")
+    @NotNull(message = "请选择上架时间")
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
-    private LocalDateTime acquisitionDate;
+    private LocalDateTime listedAt;
 
-    @NotBlank(message = "请选择馆藏状态")
+    @NotBlank(message = "请选择商品状态")
     private String status;
 
     private LocalDateTime createdAt;
@@ -92,12 +100,12 @@ public class Book {
         this.isbn = isbn;
     }
 
-    public String getTitle() {
-        return title;
+    public String getName() {
+        return name;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getAuthor() {
@@ -140,36 +148,36 @@ public class Book {
         this.language = language;
     }
 
-    public String getCallNumber() {
-        return callNumber;
+    public BigDecimal getPrice() {
+        return price;
     }
 
-    public void setCallNumber(String callNumber) {
-        this.callNumber = callNumber;
+    public void setPrice(BigDecimal price) {
+        this.price = price;
     }
 
-    public String getLocation() {
-        return location;
+    public BigDecimal getOriginalPrice() {
+        return originalPrice;
     }
 
-    public void setLocation(String location) {
-        this.location = location;
+    public void setOriginalPrice(BigDecimal originalPrice) {
+        this.originalPrice = originalPrice;
     }
 
-    public Integer getTotalCopies() {
-        return totalCopies;
+    public Integer getStock() {
+        return stock;
     }
 
-    public void setTotalCopies(Integer totalCopies) {
-        this.totalCopies = totalCopies;
+    public void setStock(Integer stock) {
+        this.stock = stock;
     }
 
-    public Integer getAvailableCopies() {
-        return availableCopies;
+    public Integer getSoldCount() {
+        return soldCount;
     }
 
-    public void setAvailableCopies(Integer availableCopies) {
-        this.availableCopies = availableCopies;
+    public void setSoldCount(Integer soldCount) {
+        this.soldCount = soldCount;
     }
 
     public String getCoverUrl() {
@@ -204,12 +212,12 @@ public class Book {
         this.tagChoices = tagChoices;
     }
 
-    public LocalDateTime getAcquisitionDate() {
-        return acquisitionDate;
+    public LocalDateTime getListedAt() {
+        return listedAt;
     }
 
-    public void setAcquisitionDate(LocalDateTime acquisitionDate) {
-        this.acquisitionDate = acquisitionDate;
+    public void setListedAt(LocalDateTime listedAt) {
+        this.listedAt = listedAt;
     }
 
     public String getStatus() {
@@ -229,10 +237,20 @@ public class Book {
     }
 
     public boolean isAvailable() {
-        return availableCopies != null && availableCopies > 0 && "在馆".equals(status);
+        return stock != null && stock > 0 && "上架".equals(status);
     }
 
-    public String getAvailabilityLabel() {
-        return isAvailable() ? "可借" : "已借完";
+    public String getStockLabel() {
+        return isAvailable() ? "现货" : "暂时缺货";
+    }
+
+    public String getDiscountLabel() {
+        if (price == null || originalPrice == null
+                || originalPrice.compareTo(price) <= 0) {
+            return "";
+        }
+        BigDecimal discount = price.multiply(BigDecimal.TEN)
+                .divide(originalPrice, 1, RoundingMode.HALF_UP);
+        return discount.stripTrailingZeros().toPlainString() + "折";
     }
 }

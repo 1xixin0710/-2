@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('订单管理')}"></head>
+<body class="admin-page">
+<header th:replace="~{fragments :: adminTopbar('orders')}"></header>
+<div class="admin-layout">
+    <aside th:replace="~{fragments :: adminSidebar('orders')}"></aside>
+    <main class="admin-main">
+        <div class="admin-heading">
+            <div>
+                <p>履约与配送</p>
+                <h1>订单管理</h1>
+                <span>查看顾客订单、安排发货并更新订单状态。</span>
+            </div>
+        </div>
+        <div th:replace="~{fragments :: flash}"></div>
+
+        <div class="status-tabs">
+            <a th:href="@{/admin/orders}" th:classappend="${selectedStatus == ''} ? 'is-active'">全部订单</a>
+            <a th:each="status : ${statuses}" th:href="@{/admin/orders(status=${status})}"
+               th:classappend="${selectedStatus == status} ? 'is-active'" th:text="${status}">待发货</a>
+        </div>
+
+        <section class="admin-panel">
+            <div class="admin-panel-head">
+                <div>
+                    <h2 th:text="${selectedStatus == '' ? '全部订单' : selectedStatus + '订单'}">全部订单</h2>
+                    <p th:text="${'共 ' + #lists.size(orders) + ' 笔订单'}">共 12 笔订单</p>
+                </div>
+            </div>
+            <div class="order-admin-list">
+                <article th:each="order : ${orders}">
+                    <header>
+                        <div>
+                            <strong th:text="${order.orderNo}">YX20261031</strong>
+                            <span th:text="${#temporals.format(order.createdAt, 'yyyy-MM-dd HH:mm')}">2026-10-31 14:30</span>
+                        </div>
+                        <span class="order-status" th:classappend="${order.statusClass}" th:text="${order.status}">待发货</span>
+                    </header>
+                    <div class="admin-order-content">
+                        <div class="admin-order-items">
+                            <a th:each="item, iter : ${order.items}" th:if="${iter.index < 3}"
+                               th:href="@{/products/{id}(id=${item.productId})}">
+                                <img th:src="${item.coverUrl}" th:alt="${item.productName}">
+                            </a>
+                            <div>
+                                <h3 th:text="${order.items[0].productName + (order.items.size() > 1 ? ' 等 ' + order.items.size() + ' 种商品' : '')}">百年孤独</h3>
+                                <p th:text="${'顾客：' + order.customerName + '（' + order.username + '）'}">顾客信息</p>
+                                <p th:text="${'收货：' + order.recipient + ' · ' + order.phone + ' · ' + order.address}">收货信息</p>
+                            </div>
+                        </div>
+                        <div class="admin-order-total">
+                            <span th:text="${'共 ' + order.itemCount + ' 件'}">共 2 件</span>
+                            <strong th:text="${'¥' + #numbers.formatDecimal(order.totalAmount, 1, 2)}">¥79.60</strong>
+                            <small th:text="${order.deliveryType + ' · 货到付款'}">配送方式</small>
+                        </div>
+                        <form class="order-status-form" th:action="@{/admin/orders/{id}/status(id=${order.id})}" method="post">
+                            <input type="hidden" name="returnStatus" th:value="${selectedStatus}">
+                            <label>
+                                <span>更新状态</span>
+                                <select name="status">
+                                    <option value="">请选择操作</option>
+                                    <option th:if="${order.status == '待发货'}" value="待收货">安排配送</option>
+                                    <option th:if="${order.status == '待收货'}" value="已完成">完成订单</option>
+                                    <option th:if="${order.status == '待发货' or order.status == '待收货'}" value="已取消">取消并恢复库存</option>
+                                </select>
+                            </label>
+                            <button class="button button-small button-primary" type="submit">执行</button>
+                        </form>
+                    </div>
+                    <p class="admin-order-remark" th:if="${order.remark != null and order.remark != ''}"
+                       th:text="${'备注：' + order.remark}">备注</p>
+                </article>
+                <div class="empty-state" th:if="${#lists.isEmpty(orders)}">
+                    <i data-lucide="receipt-text"></i>
+                    <h2>当前没有订单</h2>
+                    <p>顾客提交订单后会显示在这里。</p>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+<script th:replace="~{fragments :: scripts}"></script>
+</body>
+</html>

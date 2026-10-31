@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dlut.library.mapper.ProductMapper">
+
+    <sql id="productColumns">
+        id, isbn, name, author, publisher, publish_year, category, language,
+        price, original_price, stock, sold_count, cover_url, summary, tags,
+        listed_at, status, created_at
+    </sql>
+
+    <sql id="storeFilters">
+        status = '上架'
+        <if test="keyword != null">
+            AND (
+                LOWER(name) LIKE CONCAT('%', LOWER(#{keyword}), '%')
+                OR LOWER(author) LIKE CONCAT('%', LOWER(#{keyword}), '%')
+                OR isbn LIKE CONCAT('%', #{keyword}, '%')
+                OR LOWER(publisher) LIKE CONCAT('%', LOWER(#{keyword}), '%')
+            )
+        </if>
+        <if test="category != null">
+            AND category = #{category}
+        </if>
+        <if test="stockStatus != null">
+            AND stock &gt; 0
+        </if>
+        <if test="priceRange == '50以下'">
+            AND price &lt; 50
+        </if>
+        <if test="priceRange == '50至100'">
+            AND price &gt;= 50 AND price &lt; 100
+        </if>
+        <if test="priceRange == '100以上'">
+            AND price &gt;= 100
+        </if>
+    </sql>
+
+    <select id="searchStore" parameterType="ProductQuery" resultType="Product">
+        SELECT <include refid="productColumns"/>
+        FROM products
+        <where>
+            <include refid="storeFilters"/>
+        </where>
+        <choose>
+            <when test="sort == 'sales'">ORDER BY sold_count DESC, listed_at DESC</when>
+            <when test="sort == 'priceAsc'">ORDER BY price ASC, listed_at DESC</when>
+            <when test="sort == 'priceDesc'">ORDER BY price DESC, listed_at DESC</when>
+            <otherwise>ORDER BY listed_at DESC, id DESC</otherwise>
+        </choose>
+    </select>
+
+    <select id="searchAdmin" parameterType="ProductQuery" resultType="Product">
+        SELECT <include refid="productColumns"/>
+        FROM products
+        <where>
+            <if test="keyword != null">
+                AND (
+                    LOWER(name) LIKE CONCAT('%', LOWER(#{keyword}), '%')
+                    OR isbn LIKE CONCAT('%', #{keyword}, '%')
+                )
+            </if>
+            <if test="category != null">
+                AND category = #{category}
+            </if>
+        </where>
+        ORDER BY created_at DESC, id DESC
+    </select>
+
+    <select id="findById" resultType="Product">
+        SELECT <include refid="productColumns"/>
+        FROM products
+        WHERE id = #{id}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO products (
+            isbn, name, author, publisher, publish_year, category, language,
+            price, original_price, stock, sold_count, cover_url, summary, tags,
+            listed_at, status
+        )
+        VALUES (
+            #{isbn}, #{name}, #{author}, #{publisher}, #{publishYear}, #{category}, #{language},
+            #{price}, #{originalPrice}, #{stock}, #{soldCount}, #{coverUrl}, #{summary}, #{tags},
+            #{listedAt}, #{status}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE products
+        SET isbn = #{isbn},
+            name = #{name},
+            author = #{author},
+            publisher = #{publisher},
+            publish_year = #{publishYear},
+            category = #{category},
+            language = #{language},
+            price = #{price},
+            original_price = #{originalPrice},
+            stock = #{stock},
+            cover_url = #{coverUrl},
+            summary = #{summary},
+            tags = #{tags},
+            listed_at = #{listedAt},
+            status = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <update id="deactivate">
+        UPDATE products SET status = '下架' WHERE id = #{id}
+    </update>
+
+    <update id="decrementStock">
+        UPDATE products
+        SET stock = stock - #{quantity},
+            sold_count = sold_count + #{quantity}
+        WHERE id = #{id} AND status = '上架' AND stock &gt;= #{quantity}
+    </update>
+
+    <update id="incrementStock">
+        UPDATE products
+        SET stock = stock + #{quantity}
+        WHERE id = #{id}
+    </update>
+
+    <update id="incrementSold">
+        UPDATE products SET sold_count = sold_count + #{quantity} WHERE id = #{id}
+    </update>
+
+    <update id="decrementSold">
+        UPDATE products
+        SET sold_count = CASE WHEN sold_count &gt;= #{quantity} THEN sold_count - #{quantity} ELSE 0 END
+        WHERE id = #{id}
+    </update>
+
+    <select id="countOnSale" resultType="int">
+        SELECT COUNT(*) FROM products WHERE status = '上架'
+    </select>
+
+    <select id="sumStock" resultType="int">
+        SELECT COALESCE(SUM(stock), 0) FROM products WHERE status = '上架'
+    </select>
+
+    <select id="countLowStock" resultType="int">
+        SELECT COUNT(*) FROM products WHERE status = '上架' AND stock BETWEEN 1 AND 5
+    </select>
+
+    <select id="countOutOfStock" resultType="int">
+        SELECT COUNT(*) FROM products WHERE status = '上架' AND stock = 0
+    </select>
+</mapper>

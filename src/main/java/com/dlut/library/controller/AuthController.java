@@ -41,7 +41,7 @@ public class AuthController {
         request.getSession(true);
         request.changeSessionId();
         request.getSession().setAttribute("authUser", user);
-        redirectAttributes.addFlashAttribute("success", "登录成功，欢迎使用大工云图书馆");
+        redirectAttributes.addFlashAttribute("success", "登录成功，欢迎来到云序书集");
         return "redirect:/catalog";
     }
 
@@ -67,7 +67,7 @@ public class AuthController {
             bindingResult.rejectValue("username", "duplicate", "该用户名已被注册");
             return "auth/register";
         }
-        redirectAttributes.addFlashAttribute("success", "注册成功，请登录后使用借阅服务");
+        redirectAttributes.addFlashAttribute("success", "注册成功，请登录后选购图书");
         return "redirect:/login";
     }
 

@@ -1,6 +1,6 @@
-# 大工云图书馆
+# 云序书集图书电子商务系统
 
-基于 Spring、Spring MVC、MyBatis 的图书管理系统。页面使用 Thymeleaf 服务端渲染，本地开发使用 H2，云端部署使用 MySQL。
+基于 Spring、Spring MVC、MyBatis 的图书商城。页面使用 Thymeleaf 服务端渲染，本地开发使用 H2，云端部署使用 MySQL。前台提供商品浏览、购物车、结算和订单跟踪，后台提供商品、订单和用户管理。
 
 在线访问：https://dagong-library-cloud-77rx9j6754ggcq4w-8080.app.github.dev/catalog
 
@@ -8,11 +8,20 @@
 
 ## 功能
 
-- 公开馆藏检索：书名、作者、ISBN、索书号、分类和可借状态。
-- 读者注册、登录、预约借阅、取消预约和办理归还。
-- 馆员入藏、编辑、删除图书，确认取书和办理归还。
-- 首个注册账号自动获得馆员权限，后续注册账号为读者。
+- 公开商城：搜索、分类、价格和库存筛选，支持按销量或价格排序。
+- 商品详情、购物车、校园配送或到店自提、下单、取消订单和确认收货。
+- 后台经营数据、商品上下架、订单状态处理、用户角色调整。
+- 首位注册账号自动成为管理员，后续注册账号默认为顾客。
 - 密码使用 BCrypt 哈希保存。
+
+## 主要地址
+
+- `/catalog`：商城首页与分类检索
+- `/products/{id}`：商品详情
+- `/cart`：购物车
+- `/checkout`：确认订单
+- `/orders`：我的订单
+- `/admin`：后台管理
 
 ## 本地运行
 
@@ -29,15 +38,11 @@
 
 ```bash
 export SPRING_PROFILES_ACTIVE=cloud
-export DB_URL='jdbc:mysql://127.0.0.1:3306/dagong_library?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai'
-export DB_USERNAME='library'
+export DB_URL='jdbc:mysql://127.0.0.1:3306/yunxu_books?useUnicode=true&characterEncoding=utf8mb4&serverTimezone=Asia/Shanghai'
+export DB_USERNAME='store'
 export DB_PASSWORD='your-password'
 export DB_INIT_MODE=always
-java -jar target/dagong-cloud-library-1.0.0.jar
+java -jar target/yunxu-books-1.0.0.jar
 ```
 
-首次启动设置 `DB_INIT_MODE=always` 建表并导入馆藏数据，之后可改为 `never`。
-
-## 测试账号
-
-项目不预置登录账号。首次打开网站后，从注册页创建馆员账号，再注册读者账号即可完整验收。
+首次启动设置 `DB_INIT_MODE=always` 建表并导入商品数据，之后可改为 `never`。项目不预置登录账号，首次打开网站后从注册页创建管理员账号即可开始验收。

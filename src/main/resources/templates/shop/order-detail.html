@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('订单详情')}"></head>
+<body class="site-page">
+<header th:replace="~{fragments :: siteHeader('orders')}"></header>
+<main class="container site-main">
+    <div th:replace="~{fragments :: flash}"></div>
+    <div class="breadcrumb">
+        <a th:href="@{/orders}">我的订单</a>
+        <i data-lucide="chevron-right"></i>
+        <span th:text="${order.orderNo}">订单号</span>
+    </div>
+
+    <section class="order-detail-hero">
+        <div>
+            <p class="eyebrow">ORDER DETAIL</p>
+            <h1 th:text="${order.status}">待发货</h1>
+            <p th:text="${order.status == '待发货' ? '订单已提交，仓库正在备货。' : (order.status == '待收货' ? '商品已发出，请留意配送通知。' : (order.status == '已完成' ? '订单已完成，感谢选购。' : '订单已取消，库存已恢复。'))}">
+                订单进度说明
+            </p>
+        </div>
+        <div class="order-hero-actions">
+            <a class="button button-outline" th:href="@{/orders}">返回订单列表</a>
+            <form th:if="${order.status == '待发货'}" th:action="@{/orders/{id}/cancel(id=${order.id})}" method="post"
+                  data-confirm="确认取消该订单？取消后商品库存会恢复。">
+                <button class="button button-outline" type="submit">取消订单</button>
+            </form>
+            <form th:if="${order.status == '待收货'}" th:action="@{/orders/{id}/receive(id=${order.id})}" method="post">
+                <button class="button button-primary" type="submit">确认收货</button>
+            </form>
+        </div>
+    </section>
+
+    <div class="order-detail-layout">
+        <section class="order-detail-main">
+            <div class="detail-block">
+                <div class="block-heading">
+                    <h2>订单信息</h2>
+                    <span class="order-status" th:classappend="${order.statusClass}" th:text="${order.status}">待发货</span>
+                </div>
+                <dl class="info-grid">
+                    <div><dt>订单编号</dt><dd th:text="${order.orderNo}">YX20261031</dd></div>
+                    <div><dt>下单时间</dt><dd th:text="${#temporals.format(order.createdAt, 'yyyy-MM-dd HH:mm')}">2026-10-31 14:30</dd></div>
+                    <div><dt>收货人</dt><dd th:text="${order.recipient}">张同学</dd></div>
+                    <div><dt>联系电话</dt><dd th:text="${order.phone}">13800000000</dd></div>
+                    <div><dt>配送方式</dt><dd th:text="${order.deliveryType}">校园配送</dd></div>
+                    <div><dt>收货地址</dt><dd th:text="${order.address}">大学生活动中心</dd></div>
+                    <div class="span-2"><dt>订单备注</dt><dd th:text="${order.remark == null or order.remark == '' ? '无' : order.remark}">无</dd></div>
+                </dl>
+            </div>
+
+            <div class="detail-block">
+                <div class="block-heading">
+                    <h2>商品明细</h2>
+                    <span th:text="${order.itemCount + ' 件商品'}">2 件商品</span>
+                </div>
+                <div class="order-item-list">
+                    <article th:each="item : ${order.items}">
+                        <img th:src="${item.coverUrl}" th:alt="${item.productName}">
+                        <div>
+                            <h3>
+                                <a th:href="@{/products/{id}(id=${item.productId})}" th:text="${item.productName}">百年孤独</a>
+                            </h3>
+                            <p th:text="${'单价 ¥' + #numbers.formatDecimal(item.unitPrice, 1, 2) + ' · 数量 ' + item.quantity}">单价与数量</p>
+                        </div>
+                        <strong th:text="${'¥' + #numbers.formatDecimal(item.subtotal, 1, 2)}">¥79.60</strong>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <aside class="order-detail-summary">
+            <h2>金额汇总</h2>
+            <dl>
+                <div><dt>商品金额</dt><dd th:text="${'¥' + #numbers.formatDecimal(order.totalAmount, 1, 2)}">¥79.60</dd></div>
+                <div><dt>配送费</dt><dd>¥0.00</dd></div>
+                <div><dt>付款方式</dt><dd>货到付款</dd></div>
+            </dl>
+            <div class="summary-total">
+                <span>订单金额</span>
+                <strong><small>¥</small><b th:text="${#numbers.formatDecimal(order.totalAmount, 1, 2)}">79.60</b></strong>
+            </div>
+            <p><i data-lucide="info"></i> 订单状态由管理员在后台更新，顾客可在“待收货”时确认收货。</p>
+        </aside>
+    </div>
+</main>
+<footer th:replace="~{fragments :: footer}"></footer>
+<script th:replace="~{fragments :: scripts}"></script>
+</body>
+</html>

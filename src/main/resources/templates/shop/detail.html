@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head(${product.name})}"></head>
+<body class="site-page">
+<header th:replace="~{fragments :: siteHeader('catalog')}"></header>
+<main class="container site-main">
+    <div th:replace="~{fragments :: flash}"></div>
+    <div class="breadcrumb">
+        <a th:href="@{/catalog}">首页</a>
+        <i data-lucide="chevron-right"></i>
+        <a th:href="@{/catalog(category=${product.category})}" th:text="${product.category}">文学</a>
+        <i data-lucide="chevron-right"></i>
+        <span th:text="${product.name}">百年孤独</span>
+    </div>
+
+    <article class="product-detail">
+        <div class="detail-gallery">
+            <img th:src="${product.coverUrl}" th:alt="${product.name}">
+            <div class="detail-gallery-note">
+                <i data-lucide="shield-check"></i>
+                <span>正版图书 · 支持查验 ISBN</span>
+            </div>
+        </div>
+
+        <div class="detail-info">
+            <p class="detail-category" th:text="${product.category + ' / ' + product.language}">文学 / 中文</p>
+            <h1 th:text="${product.name}">百年孤独</h1>
+            <p class="detail-author" th:text="${product.author + ' 著' }">加西亚·马尔克斯 著</p>
+
+            <div class="detail-price-panel">
+                <span>销售价</span>
+                <strong><small>¥</small><b th:text="${#numbers.formatDecimal(product.price, 1, 2)}">39.80</b></strong>
+                <del th:if="${product.originalPrice.compareTo(product.price) > 0}"
+                     th:text="${'定价 ¥' + #numbers.formatDecimal(product.originalPrice, 1, 2)}">定价 ¥59.80</del>
+                <em th:if="${product.discountLabel != ''}" th:text="${product.discountLabel}">7.5折</em>
+            </div>
+
+            <div class="detail-sales">
+                <div><span>累计销量</span><strong th:text="${product.soldCount}">120</strong></div>
+                <div><span>当前库存</span><strong th:text="${product.stock + ' 件'}">24 件</strong></div>
+                <div><span>配送</span><strong>校内 1-2 日</strong></div>
+            </div>
+
+            <div class="detail-tags">
+                <span>服务</span>
+                <b>正版保障</b>
+                <b>货到付款</b>
+                <b>到店自提</b>
+            </div>
+
+            <form class="purchase-form" th:action="@{/cart/add}" method="post">
+                <input type="hidden" name="productId" th:value="${product.id}">
+                <label class="quantity-field">
+                    <span>购买数量</span>
+                    <div class="quantity-control">
+                        <button type="button" data-quantity-minus aria-label="减少数量"><i data-lucide="minus"></i></button>
+                        <input type="number" name="quantity" value="1" min="1" th:max="${product.stock}" data-quantity-input>
+                        <button type="button" data-quantity-plus aria-label="增加数量"><i data-lucide="plus"></i></button>
+                    </div>
+                    <small th:text="${'库存 ' + product.stock + ' 件'}">库存 24 件</small>
+                </label>
+                <div class="purchase-actions">
+                    <button class="button button-primary button-large" type="submit" name="buyNow" value="true"
+                            th:disabled="${!product.available}">
+                        <i data-lucide="credit-card"></i> 立即购买
+                    </button>
+                    <button class="button button-cart button-large" type="submit"
+                            th:disabled="${!product.available}">
+                        <i data-lucide="shopping-cart"></i> 加入购物车
+                    </button>
+                </div>
+            </form>
+
+            <div class="delivery-note">
+                <i data-lucide="truck"></i>
+                <div>
+                    <strong>配送与自提</strong>
+                    <p>校内配送 1至2个工作日；也可选择到店自提。结算时确认收货信息，付款方式为货到付款。</p>
+                </div>
+            </div>
+        </div>
+    </article>
+
+    <section class="detail-description">
+        <div class="section-title">
+            <h2>商品详情</h2>
+            <span>PRODUCT DETAILS</span>
+        </div>
+        <div class="description-grid">
+            <p th:text="${product.summary}">图书介绍</p>
+            <dl>
+                <div><dt>ISBN</dt><dd th:text="${product.isbn}">9787544253994</dd></div>
+                <div><dt>出版社</dt><dd th:text="${product.publisher}">南海出版公司</dd></div>
+                <div><dt>出版年份</dt><dd th:text="${product.publishYear}">2011</dd></div>
+                <div><dt>语种</dt><dd th:text="${product.language}">中文</dd></div>
+                <div><dt>商品分类</dt><dd th:text="${product.category}">文学</dd></div>
+                <div><dt>上架时间</dt><dd th:text="${#temporals.format(product.listedAt, 'yyyy-MM-dd')}">2026-09-24</dd></div>
+            </dl>
+        </div>
+    </section>
+</main>
+<footer th:replace="~{fragments :: footer}"></footer>
+<script th:replace="~{fragments :: scripts}"></script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('确认订单')}"></head>
+<body class="site-page">
+<header th:replace="~{fragments :: siteHeader('cart')}"></header>
+<main class="container site-main">
+    <div class="page-heading">
+        <div>
+            <p class="eyebrow">CHECKOUT</p>
+            <h1>确认订单</h1>
+            <p>填写收货信息并核对商品，提交后由后台安排配送。</p>
+        </div>
+        <a class="text-link" th:href="@{/cart}"><i data-lucide="arrow-left"></i> 返回购物车</a>
+    </div>
+
+    <form class="checkout-layout" th:action="@{/checkout}" th:object="${checkoutForm}" method="post">
+        <section class="checkout-main">
+            <div class="checkout-section">
+                <div class="section-title">
+                    <h2>收货信息</h2>
+                    <span>DELIVERY INFORMATION</span>
+                </div>
+                <div class="form-alert form-alert-error" th:if="${#fields.hasGlobalErrors()}">
+                    <p th:each="error : ${#fields.globalErrors()}" th:text="${error}">订单提交失败</p>
+                </div>
+                <div class="form-grid">
+                    <label class="field">
+                        <span>收货人 <em>*</em></span>
+                        <input type="text" th:field="*{recipient}" autocomplete="name" placeholder="请输入收货人姓名">
+                        <small class="field-error" th:if="${#fields.hasErrors('recipient')}" th:errors="*{recipient}">姓名错误</small>
+                    </label>
+                    <label class="field">
+                        <span>联系电话 <em>*</em></span>
+                        <input type="text" th:field="*{phone}" autocomplete="tel" placeholder="用于配送联系">
+                        <small class="field-error" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}">电话错误</small>
+                    </label>
+                    <fieldset class="field radio-field span-2">
+                        <legend>配送方式 <em>*</em></legend>
+                        <div class="delivery-options">
+                            <label th:each="type : ${deliveryTypes}">
+                                <input type="radio" th:field="*{deliveryType}" th:value="${type}">
+                                <span>
+                                    <i th:attr="data-lucide=${type == '校园配送' ? 'truck' : 'store'}"></i>
+                                    <strong th:text="${type}">校园配送</strong>
+                                    <small th:text="${type == '校园配送' ? '校内1至2个工作日送达' : '大学生活动中心一层自提'}">配送说明</small>
+                                </span>
+                            </label>
+                        </div>
+                        <small class="field-error" th:if="${#fields.hasErrors('deliveryType')}" th:errors="*{deliveryType}">配送方式错误</small>
+                    </fieldset>
+                    <label class="field span-2">
+                        <span>收货地址 / 自提点 <em>*</em></span>
+                        <input type="text" th:field="*{address}" autocomplete="street-address" placeholder="填写校内楼宇、宿舍或自提点">
+                        <small class="field-error" th:if="${#fields.hasErrors('address')}" th:errors="*{address}">地址错误</small>
+                    </label>
+                    <label class="field span-2">
+                        <span>订单备注</span>
+                        <textarea th:field="*{remark}" rows="3" placeholder="可填写版本、包装或配送时间说明（选填）"></textarea>
+                        <small class="field-error" th:if="${#fields.hasErrors('remark')}" th:errors="*{remark}">备注错误</small>
+                    </label>
+                </div>
+            </div>
+
+            <div class="checkout-section">
+                <div class="section-title">
+                    <h2>商品清单</h2>
+                    <span th:text="${#lists.size(lines) + ' 种商品'}">2 种商品</span>
+                </div>
+                <div class="checkout-items">
+                    <article th:each="line : ${lines}">
+                        <img th:src="${line.product.coverUrl}" th:alt="${line.product.name}">
+                        <div>
+                            <h3 th:text="${line.product.name}">百年孤独</h3>
+                            <p th:text="${line.product.author}">加西亚·马尔克斯</p>
+                            <span th:text="${'数量 ' + line.quantity}">数量 1</span>
+                        </div>
+                        <strong th:text="${'¥' + #numbers.formatDecimal(line.subtotal, 1, 2)}">¥39.80</strong>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <aside class="checkout-summary">
+            <h2>订单汇总</h2>
+            <dl>
+                <div><dt>商品金额</dt><dd th:text="${'¥' + #numbers.formatDecimal(total, 1, 2)}">¥79.60</dd></div>
+                <div><dt>配送费</dt><dd>¥0.00</dd></div>
+                <div><dt>付款方式</dt><dd th:text="${paymentMethod}">货到付款</dd></div>
+            </dl>
+            <div class="summary-total">
+                <span>应付金额</span>
+                <strong><small>¥</small><b th:text="${#numbers.formatDecimal(total, 1, 2)}">79.60</b></strong>
+            </div>
+            <button class="button button-primary button-large button-block" type="submit">
+                提交订单 <i data-lucide="check"></i>
+            </button>
+            <p class="checkout-agreement">提交订单即表示已核对商品、收货信息与配送方式。</p>
+            <div class="checkout-service">
+                <span><i data-lucide="shield-check"></i> 正版保障</span>
+                <span><i data-lucide="package-check"></i> 库存实时扣减</span>
+                <span><i data-lucide="wallet-cards"></i> 货到付款</span>
+            </div>
+        </aside>
+    </form>
+</main>
+<footer th:replace="~{fragments :: footer}"></footer>
+<script th:replace="~{fragments :: scripts}"></script>
+</body>
+</html>

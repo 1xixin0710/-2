@@ -5,25 +5,25 @@
 <main class="auth-layout">
     <section class="auth-visual">
         <a class="brand brand-light" th:href="@{/catalog}">
-            <span class="brand-seal">大图</span>
-            <span class="brand-name">
-                <strong>大工云图书馆</strong>
-                <small>DALIAN UNIVERSITY OF TECHNOLOGY LIBRARY</small>
+            <span class="brand-mark"><i data-lucide="book-open"></i></span>
+            <span class="brand-copy">
+                <strong>云序书集</strong>
+                <small>校园精选书店</small>
             </span>
         </a>
         <div class="auth-visual-copy">
-            <p>馆藏服务</p>
-            <h1>把需要的书<br>带回阅读桌</h1>
-            <span>检索、预约、取书与归还记录统一保存在馆藏系统中。</span>
+            <p>课程教材 · 经典阅读 · 前沿技术</p>
+            <h1>需要的书<br>一次买齐</h1>
+            <span>校园配送与到店自提均可选择，订单和库存记录保存在云端数据库中。</span>
         </div>
-        <p class="auth-photo-note">大连理工大学图书馆 · 阅览区</p>
+        <p class="auth-photo-note">校园阅读空间 · 云序书集</p>
     </section>
 
     <section class="auth-form-panel">
         <div class="auth-form-wrap">
-            <a class="back-link" th:href="@{/catalog}"><i data-lucide="arrow-left"></i> 返回馆藏检索</a>
-            <h2>读者登录</h2>
-            <p class="auth-intro">使用注册账号进入借阅服务。</p>
+            <a class="back-link" th:href="@{/catalog}"><i data-lucide="arrow-left"></i> 返回商城首页</a>
+            <h2>账号登录</h2>
+            <p class="auth-intro">登录后可结算购物车、查看订单和确认收货。</p>
 
             <div class="form-alert" th:if="${success}" th:text="${success}">注册成功</div>
             <div class="form-alert form-alert-error" th:if="${error}" th:text="${error}">用户名或密码错误</div>
@@ -48,8 +48,8 @@
                     登录 <i data-lucide="arrow-right"></i>
                 </button>
             </form>
-            <p class="auth-switch">还没有账号？<a th:href="@{/register}">注册读者账号</a></p>
-            <p class="auth-footnote">馆藏检索无需登录；预约借阅、查看记录与馆藏管理需使用个人账号。</p>
+            <p class="auth-switch">还没有账号？<a th:href="@{/register}">注册新账号</a></p>
+            <p class="auth-footnote">浏览和加入购物车无需登录；提交订单、查看订单与进入管理后台需要登录。</p>
         </div>
     </section>
 </main>

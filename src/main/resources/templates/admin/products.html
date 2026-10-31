@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('商品管理')}"></head>
+<body class="admin-page">
+<header th:replace="~{fragments :: adminTopbar('products')}"></header>
+<div class="admin-layout">
+    <aside th:replace="~{fragments :: adminSidebar('products')}"></aside>
+    <main class="admin-main">
+        <div class="admin-heading">
+            <div>
+                <p>商品与库存</p>
+                <h1>商品管理</h1>
+                <span>维护商品信息、销售价格、库存和上架状态。</span>
+            </div>
+            <a class="button button-primary" th:href="@{/admin/products/new}">
+                <i data-lucide="plus"></i> 新增商品
+            </a>
+        </div>
+        <div th:replace="~{fragments :: flash}"></div>
+
+        <form class="admin-filter-bar" th:action="@{/admin/products}" th:object="${query}" method="get">
+            <label>
+                <i data-lucide="search"></i>
+                <input type="search" th:field="*{keyword}" placeholder="搜索商品名称或 ISBN">
+            </label>
+            <select th:field="*{category}">
+                <option value="">全部分类</option>
+                <option th:each="category : ${categories}" th:value="${category}" th:text="${category}">文学</option>
+            </select>
+            <button class="button button-primary" type="submit">查询</button>
+            <a class="button button-outline" th:href="@{/admin/products}">重置</a>
+        </form>
+
+        <section class="admin-panel">
+            <div class="admin-panel-head">
+                <div>
+                    <h2>商品列表</h2>
+                    <p th:text="${'共 ' + #lists.size(products) + ' 件商品'}">共 87 件商品</p>
+                </div>
+            </div>
+            <div class="table-wrap">
+                <table class="data-table product-table">
+                    <thead>
+                    <tr><th>商品</th><th>分类</th><th>销售价</th><th>库存</th><th>销量</th><th>状态</th><th>上架时间</th><th>操作</th></tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="product : ${products}">
+                        <td>
+                            <div class="table-product">
+                                <img th:src="${product.coverUrl}" th:alt="${product.name}">
+                                <div>
+                                    <a th:href="@{/products/{id}(id=${product.id})}" th:text="${product.name}">百年孤独</a>
+                                    <span th:text="${product.author}">加西亚·马尔克斯</span>
+                                    <small th:text="${'ISBN ' + product.isbn}">ISBN</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td th:text="${product.category}">文学</td>
+                        <td class="money" th:text="${'¥' + #numbers.formatDecimal(product.price, 1, 2)}">¥39.80</td>
+                        <td>
+                            <span class="stock-number" th:classappend="${product.stock == 0 ? 'is-out' : (product.stock <= 5 ? 'is-low' : '')}"
+                                  th:text="${product.stock}">24</span>
+                        </td>
+                        <td th:text="${product.soldCount}">120</td>
+                        <td><span class="status-badge" th:classappend="${product.status == '上架' ? 'is-on' : 'is-off'}" th:text="${product.status}">上架</span></td>
+                        <td th:text="${#temporals.format(product.listedAt, 'yyyy-MM-dd')}">2026-09-24</td>
+                        <td>
+                            <div class="table-actions">
+                                <a th:href="@{/admin/products/{id}/edit(id=${product.id})}">编辑</a>
+                                <form th:if="${product.status == '上架'}" th:action="@{/admin/products/{id}/deactivate(id=${product.id})}"
+                                      method="post" data-confirm="确认下架该商品？历史订单仍会保留。">
+                                    <button type="submit">下架</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(products)}">
+                        <td colspan="8" class="empty-table">没有找到符合条件的商品。</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div>
+<script th:replace="~{fragments :: scripts}"></script>
+</body>
+</html>

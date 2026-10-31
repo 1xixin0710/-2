@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dlut.library.mapper.OrderMapper">
+
+    <sql id="orderColumns">
+        id, order_no, username, customer_name, recipient, phone, delivery_type,
+        address, total_amount, status, remark, created_at, updated_at
+    </sql>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO orders (
+            order_no, username, customer_name, recipient, phone, delivery_type,
+            address, total_amount, status, remark
+        )
+        VALUES (
+            #{orderNo}, #{username}, #{customerName}, #{recipient}, #{phone}, #{deliveryType},
+            #{address}, #{totalAmount}, #{status}, #{remark}
+        )
+    </insert>
+
+    <insert id="insertItem" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO order_items (
+            order_id, product_id, product_name, cover_url, unit_price,
+            quantity, subtotal
+        )
+        VALUES (
+            #{orderId}, #{productId}, #{productName}, #{coverUrl}, #{unitPrice},
+            #{quantity}, #{subtotal}
+        )
+    </insert>
+
+    <select id="findById" resultType="Order">
+        SELECT <include refid="orderColumns"/>
+        FROM orders
+        WHERE id = #{id}
+    </select>
+
+    <select id="findByUsername" resultType="Order">
+        SELECT <include refid="orderColumns"/>
+        FROM orders
+        WHERE username = #{username}
+        ORDER BY created_at DESC
+    </select>
+
+    <select id="findAll" resultType="Order">
+        SELECT <include refid="orderColumns"/>
+        FROM orders
+        <where>
+            <if test="status != null">status = #{status}</if>
+        </where>
+        ORDER BY created_at DESC
+    </select>
+
+    <select id="findRecent" resultType="Order">
+        SELECT <include refid="orderColumns"/>
+        FROM orders
+        ORDER BY created_at DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="findItems" resultType="OrderItem">
+        SELECT id, order_id, product_id, product_name, cover_url,
+               unit_price, quantity, subtotal
+        FROM order_items
+        WHERE order_id = #{orderId}
+        ORDER BY id ASC
+    </select>
+
+    <update id="updateStatus">
+        UPDATE orders
+        SET status = #{newStatus}, updated_at = CURRENT_TIMESTAMP
+        WHERE id = #{id} AND status = #{currentStatus}
+    </update>
+
+    <update id="updateCustomerStatus">
+        UPDATE orders
+        SET status = #{newStatus}, updated_at = CURRENT_TIMESTAMP
+        WHERE id = #{id}
+          AND username = #{username}
+          AND status = #{currentStatus}
+    </update>
+
+    <select id="countAll" resultType="int">
+        SELECT COUNT(*) FROM orders
+    </select>
+
+    <select id="countByStatus" resultType="int">
+        SELECT COUNT(*) FROM orders WHERE status = #{status}
+    </select>
+
+    <select id="sumRevenue" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(total_amount), 0)
+        FROM orders
+        WHERE status IN ('待发货', '待收货', '已完成')
+    </select>
+</mapper>

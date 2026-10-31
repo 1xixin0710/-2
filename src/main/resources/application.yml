@@ -6,9 +6,9 @@ server:
 
 spring:
   application:
-    name: dagong-cloud-library
+    name: yunxu-books
   datasource:
-    url: jdbc:h2:mem:dagong_library;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE
+    url: jdbc:h2:mem:yunxu_books;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE
     driver-class-name: org.h2.Driver
     username: sa
     password:

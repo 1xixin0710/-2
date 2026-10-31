@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('用户管理')}"></head>
+<body class="admin-page">
+<header th:replace="~{fragments :: adminTopbar('users')}"></header>
+<div class="admin-layout">
+    <aside th:replace="~{fragments :: adminSidebar('users')}"></aside>
+    <main class="admin-main">
+        <div class="admin-heading">
+            <div>
+                <p>顾客与权限</p>
+                <h1>用户管理</h1>
+                <span>首个注册账号为管理员，其余账号默认为顾客；可在此调整角色。</span>
+            </div>
+        </div>
+        <div th:replace="~{fragments :: flash}"></div>
+
+        <section class="admin-stats user-stats">
+            <article class="stat-card stat-blue">
+                <span><i data-lucide="users-round"></i></span>
+                <div><small>注册用户</small><strong th:text="${#lists.size(users)}">12</strong><p>包含管理员与顾客</p></div>
+            </article>
+            <article class="stat-card stat-red">
+                <span><i data-lucide="shield-check"></i></span>
+                <div><small>管理员</small><strong th:text="${adminCount}">1</strong><p>可访问管理后台</p></div>
+            </article>
+        </section>
+
+        <section class="admin-panel">
+            <div class="admin-panel-head">
+                <div><h2>账号列表</h2><p>角色变更会立即生效，当前登录账号不能修改自己的角色。</p></div>
+            </div>
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead>
+                    <tr><th>用户</th><th>账号</th><th>学号 / 工号</th><th>院系 / 单位</th><th>角色</th><th>注册时间</th><th>角色调整</th></tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="user : ${users}">
+                        <td>
+                            <div class="table-user">
+                                <span th:text="${#strings.substring(user.displayName, 0, 1)}">张</span>
+                                <strong th:text="${user.displayName}">张同学</strong>
+                            </div>
+                        </td>
+                        <td class="mono" th:text="${user.username}">user2026</td>
+                        <td th:text="${user.studentNo}">20260001</td>
+                        <td th:text="${user.department}">软件学院</td>
+                        <td><span class="role-badge" th:classappend="${user.admin ? 'is-admin' : ''}" th:text="${user.roleLabel}">顾客</span></td>
+                        <td th:text="${#temporals.format(user.createdAt, 'yyyy-MM-dd HH:mm')}">2026-10-31</td>
+                        <td>
+                            <span class="muted-cell" th:if="${user.username == currentUsername}">当前账号</span>
+                            <form class="role-form" th:unless="${user.username == currentUsername}"
+                                  th:action="@{/admin/users/{username}/role(username=${user.username})}" method="post"
+                                  data-confirm="确认调整该用户的角色？">
+                                <select name="role">
+                                    <option value="CUSTOMER" th:selected="${!user.admin}">设为顾客</option>
+                                    <option value="ADMIN" th:selected="${user.admin}">设为管理员</option>
+                                </select>
+                                <button class="button button-small button-outline" type="submit">保存</button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div>
+<script th:replace="~{fragments :: scripts}"></script>
+</body>
+</html>

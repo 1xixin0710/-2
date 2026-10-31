@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head(${mode == 'create' ? '新增商品' : '编辑商品'})}"></head>
+<body class="admin-page">
+<header th:replace="~{fragments :: adminTopbar('products')}"></header>
+<div class="admin-layout">
+    <aside th:replace="~{fragments :: adminSidebar('products')}"></aside>
+    <main class="admin-main">
+        <div class="admin-heading">
+            <div>
+                <p th:text="${mode == 'create' ? '商品建档' : '商品维护'}">商品维护</p>
+                <h1 th:text="${mode == 'create' ? '新增商品' : '编辑商品'}">新增商品</h1>
+                <span>完善图书信息、售价、库存和封面后保存。</span>
+            </div>
+            <a class="button button-outline" th:href="@{/admin/products}"><i data-lucide="arrow-left"></i> 返回商品列表</a>
+        </div>
+
+        <form class="admin-product-form"
+              th:action="${mode == 'create'} ? @{/admin/products} : @{/admin/products/{id}(id=${product.id})}"
+              th:object="${product}" method="post">
+            <div class="admin-form-main">
+                <section class="admin-panel form-panel">
+                    <div class="admin-panel-head">
+                        <div><h2>基础信息</h2><p>用于前台展示和顾客检索。</p></div>
+                    </div>
+                    <div class="form-alert form-alert-error" th:if="${#fields.hasGlobalErrors()}">
+                        <p th:each="error : ${#fields.globalErrors()}" th:text="${error}">保存失败</p>
+                    </div>
+                    <div class="form-grid">
+                        <label class="field span-2">
+                            <span>商品名称 <em>*</em></span>
+                            <input type="text" th:field="*{name}" placeholder="图书完整书名">
+                            <small class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">书名错误</small>
+                        </label>
+                        <label class="field">
+                            <span>作者 <em>*</em></span>
+                            <input type="text" th:field="*{author}" placeholder="作者或编者">
+                            <small class="field-error" th:if="${#fields.hasErrors('author')}" th:errors="*{author}">作者错误</small>
+                        </label>
+                        <label class="field">
+                            <span>ISBN <em>*</em></span>
+                            <input type="text" th:field="*{isbn}" placeholder="13位ISBN">
+                            <small class="field-error" th:if="${#fields.hasErrors('isbn')}" th:errors="*{isbn}">ISBN错误</small>
+                        </label>
+                        <label class="field">
+                            <span>出版社 <em>*</em></span>
+                            <input type="text" th:field="*{publisher}" placeholder="出版社名称">
+                            <small class="field-error" th:if="${#fields.hasErrors('publisher')}" th:errors="*{publisher}">出版社错误</small>
+                        </label>
+                        <label class="field">
+                            <span>出版年份 <em>*</em></span>
+                            <input type="number" min="1900" max="2026" th:field="*{publishYear}">
+                            <small class="field-error" th:if="${#fields.hasErrors('publishYear')}" th:errors="*{publishYear}">年份错误</small>
+                        </label>
+                        <label class="field">
+                            <span>商品分类 <em>*</em></span>
+                            <select th:field="*{category}">
+                                <option th:each="category : ${categories}" th:value="${category}" th:text="${category}">文学</option>
+                            </select>
+                        </label>
+                        <label class="field">
+                            <span>语种 <em>*</em></span>
+                            <select th:field="*{language}">
+                                <option th:each="language : ${languages}" th:value="${language}" th:text="${language}">中文</option>
+                            </select>
+                        </label>
+                        <label class="field span-2">
+                            <span>商品介绍 <em>*</em></span>
+                            <textarea th:field="*{summary}" rows="5" placeholder="介绍内容、适用课程和版本信息"></textarea>
+                            <small class="field-error" th:if="${#fields.hasErrors('summary')}" th:errors="*{summary}">介绍错误</small>
+                        </label>
+                        <fieldset class="field checkbox-field span-2">
+                            <legend>商品标签 <em>*</em></legend>
+                            <div class="check-row">
+                                <label th:each="tag : ${tagOptions}">
+                                    <input type="checkbox" th:field="*{tagChoices}" th:value="${tag}">
+                                    <span th:text="${tag}">经典名著</span>
+                                </label>
+                            </div>
+                            <small class="field-error" th:if="${#fields.hasErrors('tagChoices')}" th:errors="*{tagChoices}">标签错误</small>
+                        </fieldset>
+                    </div>
+                </section>
+
+                <section class="admin-panel form-panel">
+                    <div class="admin-panel-head">
+                        <div><h2>销售与库存</h2><p>价格和库存会直接影响前台购买流程。</p></div>
+                    </div>
+                    <div class="form-grid">
+                        <label class="field">
+                            <span>销售价 <em>*</em></span>
+                            <input type="number" min="0.01" step="0.01" th:field="*{price}">
+                            <small class="field-error" th:if="${#fields.hasErrors('price')}" th:errors="*{price}">价格错误</small>
+                        </label>
+                        <label class="field">
+                            <span>划线价 <em>*</em></span>
+                            <input type="number" min="0.01" step="0.01" th:field="*{originalPrice}">
+                            <small class="field-error" th:if="${#fields.hasErrors('originalPrice')}" th:errors="*{originalPrice}">划线价错误</small>
+                        </label>
+                        <label class="field">
+                            <span>库存数量 <em>*</em></span>
+                            <input type="number" min="0" max="99999" th:field="*{stock}">
+                            <small class="field-error" th:if="${#fields.hasErrors('stock')}" th:errors="*{stock}">库存错误</small>
+                        </label>
+                        <label class="field">
+                            <span>商品状态 <em>*</em></span>
+                            <select th:field="*{status}">
+                                <option th:each="status : ${statuses}" th:value="${status}" th:text="${status}">上架</option>
+                            </select>
+                        </label>
+                        <label class="field span-2">
+                            <span>上架时间 <em>*</em></span>
+                            <input type="datetime-local" th:field="*{listedAt}">
+                            <small class="field-error" th:if="${#fields.hasErrors('listedAt')}" th:errors="*{listedAt}">时间错误</small>
+                        </label>
+                    </div>
+                </section>
+            </div>
+
+            <aside class="admin-form-aside">
+                <div class="admin-panel cover-panel">
+                    <h2>封面图片</h2>
+                    <img th:src="${product.coverUrl == null or product.coverUrl.isBlank() ? '/images/covers/default-book.jpg' : product.coverUrl}"
+                         th:alt="${product.name == null ? '商品封面' : product.name}" data-cover-preview>
+                    <label class="field">
+                        <span>封面路径</span>
+                        <input type="text" th:field="*{coverUrl}" placeholder="/images/covers/..." data-cover-url>
+                    </label>
+                    <small>建议使用 2:3 比例的真实图书封面。</small>
+                </div>
+                <div class="admin-panel form-submit-panel">
+                    <button class="button button-primary button-large button-block" type="submit">
+                        <i data-lucide="save"></i> <span th:text="${mode == 'create' ? '保存并上架' : '保存修改'}">保存</span>
+                    </button>
+                    <a class="button button-outline button-block" th:href="@{/admin/products}">取消</a>
+                </div>
+            </aside>
+        </form>
+    </main>
+</div>
+<script th:replace="~{fragments :: scripts}"></script>
+</body>
+</html>

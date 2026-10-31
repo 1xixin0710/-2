@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('购物车')}"></head>
+<body class="site-page">
+<header th:replace="~{fragments :: siteHeader('cart')}"></header>
+<main class="container site-main">
+    <div th:replace="~{fragments :: flash}"></div>
+    <div class="page-heading">
+        <div>
+            <p class="eyebrow">SHOPPING CART</p>
+            <h1>购物车</h1>
+            <p>核对商品数量和库存后进入结算。</p>
+        </div>
+        <a class="text-link" th:href="@{/catalog}"><i data-lucide="arrow-left"></i> 继续选购</a>
+    </div>
+
+    <div class="cart-empty empty-state" th:if="${#lists.isEmpty(lines)}">
+        <i data-lucide="shopping-cart"></i>
+        <h2>购物车还是空的</h2>
+        <p>从图书列表中挑选商品，加入后即可一起结算。</p>
+        <a class="button button-primary" th:href="@{/catalog}">去选购图书</a>
+    </div>
+
+    <div class="cart-layout" th:unless="${#lists.isEmpty(lines)}">
+        <section class="cart-list">
+            <div class="cart-list-head">
+                <span>商品信息</span>
+                <span>单价</span>
+                <span>数量</span>
+                <span>小计</span>
+                <span>操作</span>
+            </div>
+            <article class="cart-item" th:each="line : ${lines}">
+                <div class="cart-product">
+                    <a th:href="@{/products/{id}(id=${line.product.id})}">
+                        <img th:src="${line.product.coverUrl}" th:alt="${line.product.name}">
+                    </a>
+                    <div>
+                        <span th:text="${line.product.category}">文学</span>
+                        <h2><a th:href="@{/products/{id}(id=${line.product.id})}" th:text="${line.product.name}">百年孤独</a></h2>
+                        <p th:text="${line.product.author}">加西亚·马尔克斯</p>
+                        <small th:text="${line.product.stockLabel}">现货</small>
+                    </div>
+                </div>
+                <strong class="cart-unit-price" th:text="${'¥' + #numbers.formatDecimal(line.product.price, 1, 2)}">¥39.80</strong>
+                <form class="cart-quantity-form" th:action="@{/cart/update}" method="post">
+                    <input type="hidden" name="productId" th:value="${line.product.id}">
+                    <div class="quantity-control compact">
+                        <button type="button" data-quantity-minus aria-label="减少数量"><i data-lucide="minus"></i></button>
+                        <input type="number" name="quantity" th:value="${line.quantity}" min="1"
+                               th:max="${line.product.stock}" data-quantity-input>
+                        <button type="button" data-quantity-plus aria-label="增加数量"><i data-lucide="plus"></i></button>
+                    </div>
+                    <button class="link-button" type="submit">更新</button>
+                </form>
+                <strong class="cart-subtotal" th:text="${'¥' + #numbers.formatDecimal(line.subtotal, 1, 2)}">¥79.60</strong>
+                <form th:action="@{/cart/remove}" method="post">
+                    <input type="hidden" name="productId" th:value="${line.product.id}">
+                    <button class="icon-text-button" type="submit"><i data-lucide="trash-2"></i> 删除</button>
+                </form>
+            </article>
+        </section>
+
+        <aside class="cart-summary">
+            <h2>结算信息</h2>
+            <dl>
+                <div><dt>商品件数</dt><dd th:text="${itemCount + ' 件'}">2 件</dd></div>
+                <div><dt>商品金额</dt><dd th:text="${'¥' + #numbers.formatDecimal(total, 1, 2)}">¥79.60</dd></div>
+                <div><dt>配送费</dt><dd>校内配送免运费</dd></div>
+            </dl>
+            <div class="summary-total">
+                <span>应付金额</span>
+                <strong><small>¥</small><b th:text="${#numbers.formatDecimal(total, 1, 2)}">79.60</b></strong>
+            </div>
+            <a class="button button-primary button-large button-block" th:href="@{/checkout}">
+                去结算 <i data-lucide="arrow-right"></i>
+            </a>
+            <p th:if="${session.authUser == null}">
+                <a class="text-link" th:href="@{/login}">登录</a> 后提交订单
+            </p>
+            <div class="payment-note">
+                <i data-lucide="wallet-cards"></i>
+                <span>本商城采用货到付款，不收集银行卡信息。</span>
+            </div>
+        </aside>
+    </div>
+</main>
+<footer th:replace="~{fragments :: footer}"></footer>
+<script th:replace="~{fragments :: scripts}"></script>
+</body>
+</html>

@@ -5,25 +5,25 @@
 <main class="auth-layout">
     <section class="auth-visual">
         <a class="brand brand-light" th:href="@{/catalog}">
-            <span class="brand-seal">大图</span>
-            <span class="brand-name">
-                <strong>大工云图书馆</strong>
-                <small>DALIAN UNIVERSITY OF TECHNOLOGY LIBRARY</small>
+            <span class="brand-mark"><i data-lucide="book-open"></i></span>
+            <span class="brand-copy">
+                <strong>云序书集</strong>
+                <small>校园精选书店</small>
             </span>
         </a>
         <div class="auth-visual-copy">
-            <p>新读者登记</p>
-            <h1>一张借书证<br>连接全部馆藏</h1>
-            <span>注册后即可预约图书、查看借阅期限并办理归还。</span>
+            <p>新用户注册</p>
+            <h1>注册账号<br>开始选购</h1>
+            <span>注册后即可提交订单、查看配送进度，并在后台管理商品和订单。</span>
         </div>
-        <p class="auth-photo-note">馆藏目录 · 阅览服务</p>
+        <p class="auth-photo-note">云序书集 · 校园图书服务</p>
     </section>
 
     <section class="auth-form-panel auth-register-panel">
         <div class="auth-form-wrap auth-register-wrap">
-            <a class="back-link" th:href="@{/catalog}"><i data-lucide="arrow-left"></i> 返回馆藏检索</a>
-            <h2>注册读者账号</h2>
-            <p class="auth-intro">首名注册账号用于初始化馆员权限，之后注册的账号均为读者。</p>
+            <a class="back-link" th:href="@{/catalog}"><i data-lucide="arrow-left"></i> 返回商城首页</a>
+            <h2>注册新账号</h2>
+            <p class="auth-intro">系统首个注册账号自动获得管理员权限，之后注册的账号默认为顾客。</p>
 
             <form class="auth-form register-form" th:action="@{/register}" th:object="${user}" method="post">
                 <div class="form-alert form-alert-error" th:if="${#fields.hasGlobalErrors()}">
@@ -38,7 +38,7 @@
                     </label>
                     <label class="field">
                         <span>姓名 <em>*</em></span>
-                        <input type="text" th:field="*{displayName}" autocomplete="name" placeholder="用于借阅记录">
+                        <input type="text" th:field="*{displayName}" autocomplete="name" placeholder="用于订单收货人">
                         <small class="field-error" th:if="${#fields.hasErrors('displayName')}"
                                th:errors="*{displayName}">姓名错误</small>
                     </label>
@@ -51,7 +51,7 @@
                                th:errors="*{studentNo}">学号错误</small>
                     </label>
                     <label class="field">
-                        <span>院系 <em>*</em></span>
+                        <span>院系 / 单位 <em>*</em></span>
                         <input type="text" th:field="*{department}" placeholder="例如 软件学院">
                         <small class="field-error" th:if="${#fields.hasErrors('department')}"
                                th:errors="*{department}">院系错误</small>

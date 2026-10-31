@@ -1,9 +1,9 @@
 package com.dlut.library;
 
-import com.dlut.library.mapper.BookMapper;
+import com.dlut.library.mapper.ProductMapper;
 import com.dlut.library.mapper.UserMapper;
-import com.dlut.library.model.Book;
-import com.dlut.library.model.BookQuery;
+import com.dlut.library.model.Product;
+import com.dlut.library.model.ProductQuery;
 import com.dlut.library.model.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,8 +11,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,59 +32,85 @@ class LibraryApplicationTests {
     private UserMapper userMapper;
 
     @Autowired
-    private BookMapper bookMapper;
+    private ProductMapper productMapper;
 
     @Test
-    void registrationBookManagementAndLoanFlowWork() throws Exception {
-        register("test_librarian", "测试馆员", "LIB90001", "图书馆");
-        register("test_reader", "测试读者", "20269999", "软件学院");
+    void registrationAdminProductCartOrderAndStatusFlowWork() throws Exception {
+        register("shop_admin", "测试管理员", "ADM90001", "商学院");
+        register("shop_customer", "测试顾客", "20269999", "软件学院");
 
-        User librarian = userMapper.findByUsername("test_librarian");
-        User reader = userMapper.findByUsername("test_reader");
-        assertThat(librarian.getRole()).isEqualTo("LIBRARIAN");
-        assertThat(reader.getRole()).isEqualTo("READER");
-        assertThat(librarian.getPasswordHash()).startsWith("$2");
+        User admin = userMapper.findByUsername("shop_admin");
+        User customer = userMapper.findByUsername("shop_customer");
+        assertThat(admin.getRole()).isEqualTo("ADMIN");
+        assertThat(customer.getRole()).isEqualTo("CUSTOMER");
+        assertThat(admin.getPasswordHash()).startsWith("$2");
 
-        MockHttpSession librarianSession = login("test_librarian");
-        mockMvc.perform(post("/librarian/books")
-                        .session(librarianSession)
-                        .param("title", "测试课程教材")
-                        .param("author", "课程组")
-                        .param("isbn", "9787300000001")
+        MockHttpSession adminSession = login("shop_admin");
+        MockHttpSession customerSession = login("shop_customer");
+
+        mockMvc.perform(get("/admin").session(adminSession))
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/admin").session(customerSession))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(post("/admin/products")
+                        .session(adminSession)
+                        .param("name", "测试电商教材")
+                        .param("author", "课程编写组")
+                        .param("isbn", "9787300000002")
                         .param("publisher", "测试出版社")
                         .param("publishYear", "2026")
-                        .param("category", "计算机")
+                        .param("category", "电子商务")
                         .param("language", "中文")
+                        .param("price", "59.80")
+                        .param("originalPrice", "79.80")
+                        .param("stock", "5")
                         .param("coverUrl", "/images/covers/default-book.jpg")
-                        .param("summary", "用于自动化测试的课程教材记录。")
-                        .param("tagChoices", "课程参考")
-                        .param("callNumber", "TP311/T001")
-                        .param("location", "伯川图书馆三层")
-                        .param("totalCopies", "2")
-                        .param("acquisitionDate", LocalDateTime.now().minusDays(1).withNano(0).toString())
-                        .param("status", "在馆"))
-                .andExpect(status().is3xxRedirection());
-
-        BookQuery query = new BookQuery();
-        query.setKeyword("测试课程教材");
-        Book book = bookMapper.search(query).get(0);
-        assertThat(book.getAvailableCopies()).isEqualTo(2);
-
-        MockHttpSession readerSession = login("test_reader");
-        mockMvc.perform(post("/loans/borrow/{id}", book.getId())
-                        .session(readerSession)
-                        .param("borrowType", "课程参考")
-                        .param("pickupLocation", "伯川图书馆三层")
-                        .param("contact", "13800000000")
-                        .param("note", "自动化测试借阅")
-                        .param("scheduledPickupAt", LocalDateTime.now().plusDays(1).withNano(0).toString())
-                        .param("dueDate", LocalDate.now().plusDays(30).toString()))
+                        .param("summary", "用于自动化测试的电子商务课程教材。")
+                        .param("tagChoices", "课程教材")
+                        .param("listedAt", LocalDateTime.now().minusDays(1).withNano(0).toString())
+                        .param("status", "上架"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/loans"));
+                .andExpect(redirectedUrl("/admin/products"));
 
-        assertThat(bookMapper.findById(book.getId()).getAvailableCopies()).isEqualTo(1);
-        mockMvc.perform(get("/loans").session(readerSession))
+        ProductQuery query = new ProductQuery();
+        query.setKeyword("测试电商教材");
+        Product product = productMapper.searchAdmin(query).get(0);
+        assertThat(product.getStock()).isEqualTo(5);
+
+        mockMvc.perform(post("/cart/add")
+                        .session(customerSession)
+                        .param("productId", product.getId().toString())
+                        .param("quantity", "2"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/cart"));
+
+        MvcResult checkout = mockMvc.perform(post("/checkout")
+                        .session(customerSession)
+                        .param("recipient", "测试顾客")
+                        .param("phone", "13800000000")
+                        .param("deliveryType", "校园配送")
+                        .param("address", "软件学院测试楼")
+                        .param("remark", "自动化测试订单"))
+                .andExpect(status().is3xxRedirection())
+                .andReturn();
+        assertThat(checkout.getResponse().getRedirectedUrl()).startsWith("/orders/");
+        assertThat(productMapper.findById(product.getId()).getStock()).isEqualTo(3);
+        assertThat(productMapper.findById(product.getId()).getSoldCount()).isEqualTo(2);
+
+        String orderId = checkout.getResponse().getRedirectedUrl().replace("/orders/", "");
+        mockMvc.perform(get("/orders/{id}", orderId).session(customerSession))
                 .andExpect(status().isOk());
+        mockMvc.perform(get("/orders").session(customerSession))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/admin/orders/{id}/status", orderId)
+                        .session(adminSession)
+                        .param("status", "待收货"))
+                .andExpect(status().is3xxRedirection());
+        mockMvc.perform(post("/orders/{id}/receive", orderId).session(customerSession))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/orders/" + orderId));
     }
 
     private void register(String username, String name, String studentNo, String department)

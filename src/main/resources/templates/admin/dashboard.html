@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('管理后台')}"></head>
+<body class="admin-page">
+<header th:replace="~{fragments :: adminTopbar('dashboard')}"></header>
+<div class="admin-layout">
+    <aside th:replace="~{fragments :: adminSidebar('dashboard')}"></aside>
+    <main class="admin-main">
+        <div class="admin-heading">
+            <div>
+                <p>经营概览</p>
+                <h1>今日管理台</h1>
+                <span>商品、库存和订单数据均来自当前云端数据库。</span>
+            </div>
+            <a class="button button-primary" th:href="@{/admin/products/new}">
+                <i data-lucide="package-plus"></i> 上架商品
+            </a>
+        </div>
+
+        <div th:replace="~{fragments :: flash}"></div>
+
+        <section class="admin-stats">
+            <article class="stat-card stat-red">
+                <span><i data-lucide="shopping-bag"></i></span>
+                <div><small>累计订单</small><strong th:text="${orderCount}">126</strong><p th:text="${'待发货 ' + pendingOrders + ' 笔'}">待发货 8 笔</p></div>
+            </article>
+            <article class="stat-card stat-blue">
+                <span><i data-lucide="book-open"></i></span>
+                <div><small>在售商品</small><strong th:text="${productCount}">87</strong><p th:text="${'总库存 ' + stockCount + ' 件'}">总库存 1800 件</p></div>
+            </article>
+            <article class="stat-card stat-green">
+                <span><i data-lucide="badge-yen"></i></span>
+                <div><small>有效订单金额</small><strong th:text="${'¥' + #numbers.formatDecimal(revenue, 1, 2)}">¥12,680.00</strong><p>不含已取消订单</p></div>
+            </article>
+            <article class="stat-card stat-amber">
+                <span><i data-lucide="triangle-alert"></i></span>
+                <div><small>库存关注</small><strong th:text="${lowStockCount + outOfStockCount}">9</strong><p th:text="${'缺货 ' + outOfStockCount + ' 件'}">缺货 2 件</p></div>
+            </article>
+        </section>
+
+        <section class="admin-panel">
+            <div class="admin-panel-head">
+                <div>
+                    <h2>最近订单</h2>
+                    <p>及时处理待发货订单，更新配送状态。</p>
+                </div>
+                <a class="text-link" th:href="@{/admin/orders}">全部订单 <i data-lucide="arrow-right"></i></a>
+            </div>
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead>
+                    <tr><th>订单号</th><th>顾客</th><th>商品</th><th>金额</th><th>配送方式</th><th>状态</th><th>下单时间</th><th>操作</th></tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="order : ${recentOrders}">
+                        <td><span class="mono" th:text="${order.orderNo}">YX20261031</span></td>
+                        <td th:text="${order.recipient}">张同学</td>
+                        <td th:text="${order.items[0].productName + (order.items.size() > 1 ? ' 等' : '')}">百年孤独</td>
+                        <td class="money" th:text="${'¥' + #numbers.formatDecimal(order.totalAmount, 1, 2)}">¥79.60</td>
+                        <td th:text="${order.deliveryType}">校园配送</td>
+                        <td><span class="order-status" th:classappend="${order.statusClass}" th:text="${order.status}">待发货</span></td>
+                        <td th:text="${#temporals.format(order.createdAt, 'MM-dd HH:mm')}">10-31 14:30</td>
+                        <td><a class="table-link" th:href="@{/admin/orders(status=${order.status})}">处理</a></td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(recentOrders)}">
+                        <td colspan="8" class="empty-table">暂无订单，顾客下单后会显示在这里。</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="quick-manage-grid">
+            <a th:href="@{/admin/products}">
+                <i data-lucide="boxes"></i>
+                <div><strong>商品与库存</strong><span>维护价格、库存和上下架状态</span></div>
+                <i data-lucide="chevron-right"></i>
+            </a>
+            <a th:href="@{/admin/orders?status=待发货}">
+                <i data-lucide="truck"></i>
+                <div><strong>待发货订单</strong><span th:text="${'当前有 ' + pendingOrders + ' 笔订单待处理'}">当前有 8 笔订单</span></div>
+                <i data-lucide="chevron-right"></i>
+            </a>
+            <a th:href="@{/admin/users}">
+                <i data-lucide="users-round"></i>
+                <div><strong>顾客与权限</strong><span>查看注册用户并分配管理员角色</span></div>
+                <i data-lucide="chevron-right"></i>
+            </a>
+        </section>
+    </main>
+</div>
+<script th:replace="~{fragments :: scripts}"></script>
+</body>
+</html>

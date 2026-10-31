@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('全部商品')}"></head>
+<body class="site-page">
+<header th:replace="~{fragments :: siteHeader('catalog')}"></header>
+<main class="container site-main">
+    <div th:replace="~{fragments :: flash}"></div>
+
+    <section class="catalog-intro">
+        <div>
+            <p class="eyebrow">BOOK STORE</p>
+            <h1>校园图书精选</h1>
+            <p>教材、名著、人工智能与电子商务类图书均可在线选购，支持校园配送和到店自提。</p>
+        </div>
+        <div class="catalog-metrics">
+            <div><strong th:text="${productCount}">87</strong><span>在售图书</span></div>
+            <div><strong th:text="${stockCount}">1800</strong><span>可售库存</span></div>
+            <div><strong>1-2</strong><span>工作日送达</span></div>
+        </div>
+    </section>
+
+    <div class="catalog-layout">
+        <aside class="filter-panel">
+            <form th:action="@{/catalog}" th:object="${query}" method="get">
+                <div class="filter-block">
+                    <h2>图书分类</h2>
+                    <a th:href="@{/catalog(keyword=${query.keyword},sort=${query.sort})}"
+                       th:classappend="${query.category == null or query.category == ''} ? 'is-active'">
+                        全部分类
+                    </a>
+                    <a th:each="category : ${categories}"
+                       th:href="@{/catalog(category=${category},keyword=${query.keyword},sort=${query.sort})}"
+                       th:classappend="${query.category == category} ? 'is-active'"
+                       th:text="${category}">文学</a>
+                </div>
+                <div class="filter-block">
+                    <h2>价格区间</h2>
+                    <label>
+                        <input type="radio" th:field="*{priceRange}" value="">
+                        <span>不限价格</span>
+                    </label>
+                    <label th:each="range : ${priceRanges}">
+                        <input type="radio" th:field="*{priceRange}" th:value="${range}">
+                        <span th:text="${range}">50以下</span>
+                    </label>
+                </div>
+                <div class="filter-block">
+                    <h2>库存状态</h2>
+                    <label>
+                        <input type="checkbox" th:field="*{stockStatus}" value="有货">
+                        <span>仅看现货</span>
+                    </label>
+                </div>
+                <input type="hidden" th:field="*{keyword}">
+                <input type="hidden" th:field="*{category}">
+                <input type="hidden" th:field="*{sort}">
+                <button class="button button-primary button-block" type="submit">筛选商品</button>
+            </form>
+            <div class="stock-notice">
+                <i data-lucide="badge-check"></i>
+                <div>
+                    <strong>正版保障</strong>
+                    <p>所有图书均为课程指定版本或正规出版物。</p>
+                </div>
+            </div>
+        </aside>
+
+        <section class="product-results">
+            <div class="result-toolbar">
+                <div>
+                    <strong>全部商品</strong>
+                    <span>共 <b th:text="${#lists.size(products)}">87</b> 件</span>
+                    <span th:if="${query.category != null and query.category != ''}"
+                          class="active-filter" th:text="${query.category}">文学</span>
+                </div>
+                <div class="sort-links">
+                    <span>排序：</span>
+                    <a th:href="@{/catalog(keyword=${query.keyword},category=${query.category},priceRange=${query.priceRange},stockStatus=${query.stockStatus})}"
+                       th:classappend="${query.sort == null or query.sort == ''} ? 'is-active'">综合</a>
+                    <a th:href="@{/catalog(keyword=${query.keyword},category=${query.category},priceRange=${query.priceRange},stockStatus=${query.stockStatus},sort='sales')}"
+                       th:classappend="${query.sort == 'sales'} ? 'is-active'">销量</a>
+                    <a th:href="@{/catalog(keyword=${query.keyword},category=${query.category},priceRange=${query.priceRange},stockStatus=${query.stockStatus},sort='priceAsc')}"
+                       th:classappend="${query.sort == 'priceAsc'} ? 'is-active'">价格升序</a>
+                    <a th:href="@{/catalog(keyword=${query.keyword},category=${query.category},priceRange=${query.priceRange},stockStatus=${query.stockStatus},sort='priceDesc')}"
+                       th:classappend="${query.sort == 'priceDesc'} ? 'is-active'">价格降序</a>
+                </div>
+            </div>
+
+            <div class="empty-state" th:if="${#lists.isEmpty(products)}">
+                <i data-lucide="package-search"></i>
+                <h2>没有找到符合条件的图书</h2>
+                <p>可以更换关键词或放宽分类、价格与库存条件。</p>
+                <a class="button button-primary" th:href="@{/catalog}">查看全部商品</a>
+            </div>
+
+            <div class="product-grid" th:unless="${#lists.isEmpty(products)}">
+                <article class="product-card" th:each="product : ${products}">
+                    <a class="product-cover" th:href="@{/products/{id}(id=${product.id})}">
+                        <img th:src="${product.coverUrl}" th:alt="${product.name}">
+                        <span class="discount-tag" th:if="${product.discountLabel != ''}"
+                              th:text="${product.discountLabel}">7.5折</span>
+                    </a>
+                    <div class="product-card-body">
+                        <p class="product-category" th:text="${product.category + ' · ' + product.language}">文学 · 中文</p>
+                        <h2><a th:href="@{/products/{id}(id=${product.id})}" th:text="${product.name}">百年孤独</a></h2>
+                        <p class="product-author" th:text="${product.author}">加西亚·马尔克斯</p>
+                        <div class="price-row">
+                            <strong><small>¥</small><span th:text="${#numbers.formatDecimal(product.price, 1, 2)}">39.80</span></strong>
+                            <del th:if="${product.originalPrice.compareTo(product.price) > 0}"
+                                 th:text="${'¥' + #numbers.formatDecimal(product.originalPrice, 1, 2)}">¥59.80</del>
+                        </div>
+                        <div class="product-meta">
+                            <span th:text="${product.stockLabel}">现货</span>
+                            <span th:text="${'已售 ' + product.soldCount}">已售 120</span>
+                        </div>
+                        <form class="quick-cart" th:action="@{/cart/add}" method="post">
+                            <input type="hidden" name="productId" th:value="${product.id}">
+                            <input type="hidden" name="quantity" value="1">
+                            <button class="button button-small" type="submit"
+                                    th:classappend="${product.available ? 'button-primary' : 'button-disabled'}"
+                                    th:disabled="${!product.available}">
+                                <i data-lucide="shopping-cart"></i>
+                                <span th:text="${product.available ? '加入购物车' : '暂时缺货'}">加入购物车</span>
+                            </button>
+                        </form>
+                    </div>
+                </article>
+            </div>
+        </section>
+    </div>
+</main>
+<footer th:replace="~{fragments :: footer}"></footer>
+<script th:replace="~{fragments :: scripts}"></script>
+</body>
+</html>

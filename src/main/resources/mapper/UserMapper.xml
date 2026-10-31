@@ -15,6 +15,16 @@
         SELECT COUNT(*) FROM users
     </select>
 
+    <select id="findAll" resultType="User">
+        SELECT id, username, display_name, role, student_no, department, created_at
+        FROM users
+        ORDER BY created_at DESC
+    </select>
+
+    <select id="countByRole" resultType="int">
+        SELECT COUNT(*) FROM users WHERE role IN (#{role}, 'LIBRARIAN')
+    </select>
+
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO users (
             username, password_hash, display_name, role,
@@ -25,4 +35,8 @@
             #{studentNo}, #{department}
         )
     </insert>
+
+    <update id="updateRole">
+        UPDATE users SET role = #{role} WHERE username = #{username}
+    </update>
 </mapper>
