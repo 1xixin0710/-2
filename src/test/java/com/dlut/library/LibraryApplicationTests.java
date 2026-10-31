@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockHttpSession;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -18,6 +19,7 @@ import java.time.LocalDateTime;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -36,6 +38,13 @@ class LibraryApplicationTests {
 
     @Test
     void registrationAdminProductCartOrderAndStatusFlowWork() throws Exception {
+        MvcResult catalog = mockMvc.perform(get("/catalog"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
+                .andReturn();
+        assertThat(catalog.getResponse().getCharacterEncoding()).isEqualToIgnoringCase("UTF-8");
+        assertThat(catalog.getResponse().getContentAsString()).contains("云序书集");
+
         register("shop_admin", "测试管理员", "ADM90001", "商学院");
         register("shop_customer", "测试顾客", "20269999", "软件学院");
 
