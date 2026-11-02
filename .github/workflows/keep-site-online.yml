@@ -1,0 +1,43 @@
+name: Keep bookstore online
+
+on:
+  schedule:
+    - cron: "*/20 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: keep-bookstore-online
+  cancel-in-progress: true
+
+jobs:
+  keep-online:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+
+    env:
+      CODESPACE_NAME: dagong-library-cloud-77rx9j6754ggcq4w
+      SITE_URL: https://dagong-library-cloud-77rx9j6754ggcq4w-8080.app.github.dev/catalog
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start the application
+        env:
+          GH_TOKEN: ${{ secrets.CODESPACE_TOKEN }}
+        run: |
+          gh codespace cp -c "$CODESPACE_NAME" -e ".github/scripts/start-site.sh" "remote:/tmp/"
+          gh codespace ssh -c "$CODESPACE_NAME" -- "bash /tmp/start-site.sh"
+
+      - name: Publish port 8080 and verify
+        env:
+          GH_TOKEN: ${{ secrets.CODESPACE_TOKEN }}
+        run: |
+          gh codespace ports forward 8080:8080 -c "$CODESPACE_NAME" >/tmp/forward.log 2>&1 &
+          FORWARD_PID=$!
+          trap 'kill "$FORWARD_PID" 2>/dev/null || true' EXIT
+          sleep 5
+          gh codespace ports visibility 8080:public -c "$CODESPACE_NAME"
+          curl -fsS --retry 3 --retry-delay 5 --max-time 30 "$SITE_URL" >/dev/null
