@@ -4,8 +4,6 @@
 
 在线访问：https://dagong-library-cloud-77rx9j6754ggcq4w-8080.app.github.dev/catalog
 
-课程报告：[网站建设大作业-学号-姓名.docx](./网站建设大作业-学号-姓名.docx)
-
 ## 功能
 
 - 公开商城：搜索、分类、价格和库存筛选，支持按销量或价格排序。
