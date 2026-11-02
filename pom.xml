@@ -12,10 +12,10 @@
     </parent>
 
     <groupId>com.dlut</groupId>
-    <artifactId>yunxu-books</artifactId>
+    <artifactId>dagong-cloud-library</artifactId>
     <version>1.0.0</version>
-    <name>yunxu-books</name>
-    <description>云序书集电子商务系统</description>
+    <name>dagong-cloud-library</name>
+    <description>大工云图书馆</description>
 
     <properties>
         <java.version>17</java.version>

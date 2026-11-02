@@ -8,18 +8,14 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfig implements WebMvcConfigurer {
 
     private final AuthInterceptor authInterceptor;
-    private final AdminInterceptor adminInterceptor;
 
-    public WebConfig(AuthInterceptor authInterceptor, AdminInterceptor adminInterceptor) {
+    public WebConfig(AuthInterceptor authInterceptor) {
         this.authInterceptor = authInterceptor;
-        this.adminInterceptor = adminInterceptor;
     }
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(authInterceptor)
-                .addPathPatterns("/checkout/**", "/orders/**", "/admin/**");
-        registry.addInterceptor(adminInterceptor)
-                .addPathPatterns("/admin/**");
+                .addPathPatterns("/loans/**", "/librarian/**");
     }
 }

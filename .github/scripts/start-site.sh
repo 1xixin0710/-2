@@ -18,7 +18,7 @@ for _ in $(seq 1 30); do
     sleep 1
 done
 
-if ! pgrep -f '^java .*target/yunxu-books-1.0.0.jar$' >/dev/null; then
+if ! pgrep -f '^java .*target/dagong-cloud-library-1.0.0.jar$' >/dev/null; then
     DB_USERNAME=$(sudo docker exec library-mysql printenv MYSQL_USER)
     DB_PASSWORD=$(sudo docker exec library-mysql printenv MYSQL_PASSWORD)
     DB_DATABASE=$(sudo docker exec library-mysql printenv MYSQL_DATABASE)
@@ -30,8 +30,8 @@ if ! pgrep -f '^java .*target/yunxu-books-1.0.0.jar$' >/dev/null; then
         DB_PASSWORD="$DB_PASSWORD" \
         SPRING_PROFILES_ACTIVE=cloud \
         DB_INIT_MODE=never \
-        java -Dfile.encoding=UTF-8 -jar target/yunxu-books-1.0.0.jar \
-        >/tmp/yunxu-books.log 2>&1 </dev/null &
+        java -Dfile.encoding=UTF-8 -jar target/dagong-cloud-library-1.0.0.jar \
+        >/tmp/dagong-cloud-library.log 2>&1 </dev/null &
 fi
 
 for _ in $(seq 1 60); do
@@ -41,5 +41,5 @@ for _ in $(seq 1 60); do
     sleep 1
 done
 
-tail -n 50 /tmp/yunxu-books.log
+tail -n 50 /tmp/dagong-cloud-library.log
 exit 1

@@ -18,25 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
         window.setTimeout(() => {
             flash.classList.add("is-hiding");
             window.setTimeout(() => flash.remove(), 220);
-        }, 4500);
-    });
-
-    document.querySelectorAll(".quantity-control").forEach((control) => {
-        const input = control.querySelector("[data-quantity-input]");
-        if (!input) return;
-        const min = Number(input.min || 1);
-        const max = Number(input.max || 99);
-
-        control.querySelector("[data-quantity-minus]")?.addEventListener("click", () => {
-            input.value = String(Math.max(min, Number(input.value || min) - 1));
-        });
-        control.querySelector("[data-quantity-plus]")?.addEventListener("click", () => {
-            input.value = String(Math.min(max, Number(input.value || min) + 1));
-        });
-        input.addEventListener("change", () => {
-            const value = Number(input.value || min);
-            input.value = String(Math.min(max, Math.max(min, value)));
-        });
+        }, 4200);
     });
 
     const coverInput = document.querySelector("[data-cover-url]");
@@ -47,11 +29,22 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    document.querySelectorAll("form[data-confirm]").forEach((form) => {
-        form.addEventListener("submit", (event) => {
-            if (!window.confirm(form.dataset.confirm)) {
-                event.preventDefault();
-            }
+    const deleteDialog = document.querySelector("#deleteBookDialog");
+    const deleteForm = document.querySelector("#deleteBookForm");
+    const deleteTitle = document.querySelector("#deleteBookTitle");
+    document.querySelectorAll("[data-delete-book]").forEach((button) => {
+        button.addEventListener("click", () => {
+            deleteForm.action = `/librarian/books/${button.dataset.id}/delete`;
+            deleteTitle.textContent = button.dataset.title;
+            deleteDialog.showModal();
         });
     });
+    if (deleteDialog) {
+        deleteDialog.querySelector("[data-dialog-close]")?.addEventListener("click", () => {
+            deleteDialog.close();
+        });
+        deleteDialog.addEventListener("click", (event) => {
+            if (event.target === deleteDialog) deleteDialog.close();
+        });
+    }
 });

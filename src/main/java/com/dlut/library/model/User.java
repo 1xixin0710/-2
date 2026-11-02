@@ -107,11 +107,11 @@ public class User {
         this.createdAt = createdAt;
     }
 
-    public boolean isAdmin() {
-        return "ADMIN".equals(role) || "LIBRARIAN".equals(role);
+    public boolean isLibrarian() {
+        return "LIBRARIAN".equals(role);
     }
 
     public String getRoleLabel() {
-        return isAdmin() ? "管理员" : "顾客";
+        return isLibrarian() ? "馆员" : "读者";
     }
 }

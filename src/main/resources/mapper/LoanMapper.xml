@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dlut.library.mapper.LoanMapper">
+
+    <sql id="loanColumns">
+        id, loan_no, book_id, book_title, book_cover_url, call_number,
+        reader_username, reader_name, borrow_type, pickup_location, contact,
+        note, scheduled_pickup_at, borrow_date, due_date, returned_at,
+        status, created_at
+    </sql>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO loans (
+            loan_no, book_id, book_title, book_cover_url, call_number,
+            reader_username, reader_name, borrow_type, pickup_location, contact,
+            note, scheduled_pickup_at, due_date, status
+        )
+        VALUES (
+            #{loanNo}, #{bookId}, #{bookTitle}, #{bookCoverUrl}, #{callNumber},
+            #{readerUsername}, #{readerName}, #{borrowType}, #{pickupLocation}, #{contact},
+            #{note}, #{scheduledPickupAt}, #{dueDate}, #{status}
+        )
+    </insert>
+
+    <select id="findByReader" resultType="Loan">
+        SELECT <include refid="loanColumns"/>
+        FROM loans
+        WHERE reader_username = #{readerUsername}
+        ORDER BY created_at DESC
+    </select>
+
+    <select id="findAll" resultType="Loan">
+        SELECT <include refid="loanColumns"/>
+        FROM loans
+        ORDER BY created_at DESC
+    </select>
+
+    <select id="findById" resultType="Loan">
+        SELECT <include refid="loanColumns"/>
+        FROM loans
+        WHERE id = #{id}
+    </select>
+
+    <select id="countActiveForBook" resultType="int">
+        SELECT COUNT(*)
+        FROM loans
+        WHERE book_id = #{bookId}
+          AND reader_username = #{readerUsername}
+          AND status IN ('待取书', '借阅中')
+    </select>
+
+    <update id="cancel">
+        UPDATE loans
+        SET status = '已取消'
+        WHERE id = #{id}
+          AND reader_username = #{readerUsername}
+          AND status = '待取书'
+    </update>
+
+    <update id="confirmPickup">
+        UPDATE loans
+        SET status = '借阅中',
+            borrow_date = CURRENT_TIMESTAMP
+        WHERE id = #{id}
+          AND status = '待取书'
+          AND due_date &gt;= CURRENT_DATE
+    </update>
+
+    <update id="markReturned">
+        UPDATE loans
+        SET status = '已归还',
+            returned_at = CURRENT_TIMESTAMP
+        WHERE id = #{id}
+          AND status = '借阅中'
+          <if test="!librarian">
+              AND reader_username = #{readerUsername}
+          </if>
+    </update>
+</mapper>
