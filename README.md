@@ -1,8 +1,8 @@
 # 大工云图书馆
 
-基于 Spring、Spring MVC、MyBatis 的图书管理系统。页面使用 Thymeleaf 服务端渲染，本地开发使用 H2，云端部署使用 MySQL。
+基于 Spring、Spring MVC、MyBatis 的图书管理系统。页面使用 Thymeleaf 服务端渲染，本地开发使用 H2，云端部署使用 PostgreSQL。
 
-在线访问：https://dagong-library-cloud-77rx9j6754ggcq4w-8080.app.github.dev/catalog
+在线访问：https://dagong-cloud-library.onrender.com/catalog
 
 ## 功能
 
@@ -23,18 +23,15 @@
 
 ## 云端运行
 
-准备 MySQL 数据库并设置环境变量：
+准备 PostgreSQL 数据库并设置环境变量：
 
 ```bash
-export SPRING_PROFILES_ACTIVE=cloud
-export DB_URL='jdbc:mysql://127.0.0.1:3306/dagong_library?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai'
-export DB_USERNAME='library'
-export DB_PASSWORD='your-password'
-export DB_INIT_MODE=always
+export SPRING_PROFILES_ACTIVE=postgres
+export DATABASE_URL='postgresql://user:password@host/database?sslmode=require'
 java -jar target/dagong-cloud-library-1.0.0.jar
 ```
 
-首次启动设置 `DB_INIT_MODE=always` 建表并导入馆藏数据，之后可改为 `never`。
+首次启动会自动建表并导入馆藏数据，后续启动不会覆盖已有用户和借阅记录。
 
 ## 测试账号
 
