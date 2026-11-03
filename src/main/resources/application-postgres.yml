@@ -2,12 +2,6 @@ spring:
   config:
     activate:
       on-profile: postgres
-  datasource:
-    url: jdbc:${DATABASE_URL}
-    driver-class-name: org.postgresql.Driver
-    hikari:
-      maximum-pool-size: 5
-      connection-timeout: 15000
   sql:
     init:
       mode: never
