@@ -9,16 +9,22 @@ fi
 
 if [ "$(sudo docker inspect -f '{{.State.Status}}' library-mysql 2>/dev/null || true)" != "running" ]; then
     if ! sudo docker start library-mysql >/dev/null 2>&1; then
-        # Codespaces can lose a container layer after resume while the bind mount survives.
-        sudo docker inspect -f '{{range .Config.Env}}{{println .}}{{end}}' library-mysql > /tmp/library-mysql.env
-        sudo docker rename library-mysql "library-mysql-corrupt-$(date +%s)"
-        sudo docker run -d \
-            --name library-mysql \
-            --restart unless-stopped \
-            --env-file /tmp/library-mysql.env \
-            -p 127.0.0.1:3306:3306 \
-            -v /workspaces/-2/.data/mysql:/var/lib/mysql \
-            mysql:8.0 >/dev/null
+        # Codespaces can recover an older MySQL container while the current layer is broken.
+        running_mysql=$(sudo docker ps --filter 'publish=3306' --format '{{.Names}}' | head -n 1)
+        if [ -n "$running_mysql" ]; then
+            sudo docker rm library-mysql >/dev/null
+            sudo docker rename "$running_mysql" library-mysql
+        else
+            sudo docker inspect -f '{{range .Config.Env}}{{println .}}{{end}}' library-mysql > /tmp/library-mysql.env
+            sudo docker rename library-mysql "library-mysql-corrupt-$(date +%s)"
+            sudo docker run -d \
+                --name library-mysql \
+                --restart unless-stopped \
+                --env-file /tmp/library-mysql.env \
+                -p 127.0.0.1:3306:3306 \
+                -v /workspaces/-2/.data/mysql:/var/lib/mysql \
+                mysql:8.0 >/dev/null
+        fi
     fi
 fi
 
