@@ -1,0 +1,31 @@
+spring:
+  config:
+    activate:
+      on-profile: postgres
+  datasource:
+    url: jdbc:${DATABASE_URL}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 5
+      connection-timeout: 15000
+  sql:
+    init:
+      mode: never
+
+server:
+  port: ${PORT:8080}
+  forward-headers-strategy: native
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+      force-request: true
+      force-response: true
+  tomcat:
+    uri-encoding: UTF-8
+    use-relative-redirects: true
+
+logging:
+  level:
+    com.dlut.library.mapper: info
