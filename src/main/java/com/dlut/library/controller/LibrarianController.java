@@ -5,6 +5,7 @@ import com.dlut.library.model.User;
 import com.dlut.library.service.BookService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -54,14 +55,18 @@ public class LibrarianController {
                          HttpSession session,
                          RedirectAttributes redirectAttributes) {
         requireLibrarian(session);
-        if (bindingResult.hasErrors()) {
-            model.addAttribute("mode", "create");
-            addOptions(model);
-            return "books/form";
+        if (!bindingResult.hasErrors()) {
+            try {
+                bookService.create(book);
+                redirectAttributes.addFlashAttribute("success", "图书已入藏");
+                return "redirect:/books/" + book.getId();
+            } catch (DuplicateKeyException exception) {
+                bindingResult.rejectValue("isbn", "duplicate", "该 ISBN 已存在");
+            }
         }
-        bookService.create(book);
-        redirectAttributes.addFlashAttribute("success", "图书已入藏");
-        return "redirect:/books/" + book.getId();
+        model.addAttribute("mode", "create");
+        addOptions(model);
+        return "books/form";
     }
 
     @GetMapping("/{id}/edit")
@@ -88,21 +93,21 @@ public class LibrarianController {
                          HttpSession session,
                          RedirectAttributes redirectAttributes) {
         requireLibrarian(session);
-        if (bindingResult.hasErrors()) {
-            model.addAttribute("mode", "edit");
-            addOptions(model);
-            return "books/form";
+        book.setId(id);
+        if (!bindingResult.hasErrors()) {
+            try {
+                bookService.update(id, book);
+                redirectAttributes.addFlashAttribute("success", "馆藏信息已更新");
+                return "redirect:/books/" + id;
+            } catch (DuplicateKeyException exception) {
+                bindingResult.rejectValue("isbn", "duplicate", "该 ISBN 已存在");
+            } catch (IllegalArgumentException exception) {
+                bindingResult.reject("update", exception.getMessage());
+            }
         }
-        try {
-            bookService.update(id, book);
-            redirectAttributes.addFlashAttribute("success", "馆藏信息已更新");
-            return "redirect:/books/" + id;
-        } catch (IllegalArgumentException exception) {
-            bindingResult.reject("update", exception.getMessage());
-            model.addAttribute("mode", "edit");
-            addOptions(model);
-            return "books/form";
-        }
+        model.addAttribute("mode", "edit");
+        addOptions(model);
+        return "books/form";
     }
 
     @PostMapping("/{id}/delete")

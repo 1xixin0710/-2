@@ -14,16 +14,27 @@
 
 ## 本地运行
 
+需要 JDK 17 或更高版本。macOS / Linux：
+
 ```bash
-./mvnw test
-./mvnw spring-boot:run
+bash ./mvnw verify
+bash ./mvnw spring-boot:run
+```
+
+Windows PowerShell：
+
+```powershell
+.\mvnw.cmd verify
+.\mvnw.cmd spring-boot:run
 ```
 
 访问 `http://localhost:8080/catalog`。
 
 ## 云端运行
 
-准备 PostgreSQL 数据库并设置环境变量：
+仓库的 GitHub Actions 负责编译和测试，不启动线上站点。Render 部署配置见 `render.yaml`。
+
+手动部署时，先完成本地构建，再准备 PostgreSQL 数据库并设置环境变量：
 
 ```bash
 export SPRING_PROFILES_ACTIVE=postgres
